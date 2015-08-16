@@ -23,6 +23,7 @@ class AdaptiveTuning:
         self.theoretical_tonic = 0
         self.theoretical_pitches = {}
         self.adapted_histogram = {}
+        self.adapted_score = {'bpm': self.score['bpm'], 'score': []}
 
         self.out_path_1 = musicxml_score_path[:-4] + "-out1.wav"
         self.out_path_2 = musicxml_score_path[:-4] + "-out2.wav"
@@ -50,9 +51,9 @@ class AdaptiveTuning:
 
     def compute_score_tonic(self):
         for i in range(1, len(self.score['notes'])):
-            if self.score['notes'][-i] != '__':
+            if self.score['notes'][-i][0] != '__':
                 self.theoretical_tonic = self.score['notes'][-i][2]
-                print self.score['notes'][-i]
+                print self.theoretical_tonic
                 break
 
     def adapt_score_frequencies(self, synth=True):
@@ -72,12 +73,15 @@ class AdaptiveTuning:
                 self.adapted_histogram['{0}'.format(element)] = int(theo_freq / ratio)
                 print "No!!!", candidate, theo_freq / ratio, ratio, theo_freq / candidate
 
-        for element in self.adapted_histogram: print(element, self.adapted_histogram['{0}'.format(element)])
+        for element in self.adapted_histogram: print(element, self.theoretical_histogram['{0}'.format(element)][0],
+                                                     self.adapted_histogram['{0}'.format(element)])
+
         for element in self.score['notes']:
             if element[0] != '__':
                 element[2] = self.adapted_histogram['{0}'.format(element[0] + str(element[1]))]
 
         if synth: self.make_wav()
+        return self.theoretical_histogram, self.adapted_histogram
 
     def make_wav(self):
         synth_karplus(self.score, fn=self.out_path_1)

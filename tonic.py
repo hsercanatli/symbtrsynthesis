@@ -141,7 +141,7 @@ class TonicLastNote(Histogram, Data):
         self.counter = 0
         self.data = data
 
-        # getting histogram 3 times more resolution
+        # getting histograms 3 times more resolution
         Histogram.__init__(self, data, post_filter=True, freq_limit=True, bottom_limit=64, upper_limit=1024)
         self.compute_histogram(times=3)
 
@@ -172,43 +172,68 @@ class TonicLastNote(Histogram, Data):
             self.peaks_list = sorted(self.peaks_list, key=lambda x: abs(last_note - x))
 
             for j in range(len(self.peaks_list)):
-                tonic_candi = float(self.peaks_list[j])
+                tonic_candidate = float(self.peaks_list[j])
 
-                if (tonic_candi / (2 ** (2. / 53))) <= last_note <= (tonic_candi * (2 ** (2. / 53))):
-                    self.tonic = {"estimated_tonic": tonic_candi,
+                if (tonic_candidate / (2 ** (2. / 53))) <= last_note <= (tonic_candidate * (2 ** (2. / 53))):
+                    self.tonic = {"estimated_tonic": tonic_candidate,
                                   "time_interval": [self.pitch_chunks[-self.counter][0][0],
                                                     self.pitch_chunks[-self.counter][-1][0]]}
                     print "Tonic=", self.tonic
                     break
 
-                elif last_note >= tonic_candi or last_note <= tonic_candi:
-                    if last_note <= tonic_candi:
-                        times = round(tonic_candi / last_note)
+                elif last_note >= tonic_candidate or last_note <= tonic_candidate:
+                    if last_note <= tonic_candidate:
+                        times = round(tonic_candidate / last_note)
 
-                        if (tonic_candi / (2 ** (2. / 53))) <= (last_note * times) \
-                                <= (tonic_candi * (2 ** (2. / 53))) and times < 3:
-                            self.tonic = {"estimated_tonic": tonic_candi,
+                        if (tonic_candidate / (2 ** (2. / 53))) <= (last_note * times) \
+                                <= (tonic_candidate * (2 ** (2. / 53))) and times < 3:
+                            self.tonic = {"estimated_tonic": tonic_candidate,
                                           "time_interval": [self.pitch_chunks[-self.counter][0][0],
                                                             self.pitch_chunks[-self.counter][-1][0]]}
                             print "Tonic=", self.tonic
                             break
 
                     else:
-                        times = round(last_note / tonic_candi)
-                        if (tonic_candi / (2 ** (2. / 53))) <= (last_note / times) \
-                                <= (tonic_candi * (2 ** (2. / 53))) and times < 3:
-                            self.tonic = {"estimated_tonic": tonic_candi,
+                        times = round(last_note / tonic_candidate)
+
+                        if (tonic_candidate / (2 ** (2. / 53))) <= (last_note / times) \
+                                <= (tonic_candidate * (2 ** (2. / 53))) and times < 3:
+                            self.tonic = {"estimated_tonic": tonic_candidate,
                                           "time_interval": [self.pitch_chunks[-self.counter][0][0],
                                                             self.pitch_chunks[-self.counter][-1][0]]}
                             print "Tonic=", self.tonic
                             break
+
+        # octave correction
+        temp_tonic = self.tonic['estimated_tonic'] / 2
+        temp_candidate = self.find_nearest(self.peaks_list, temp_tonic)
+        temp_candidate_ind = [i for i, x in enumerate(self.peaks['peaks'][0]) if x == temp_candidate]
+        temp_candidate_occurence = self.peaks["peaks"][1][temp_candidate_ind[0]]
+
+        tonic_ind = [i for i, x in enumerate(self.peaks['peaks'][0]) if x == self.tonic['estimated_tonic']]
+        tonic_occurrence = self.peaks["peaks"][1][tonic_ind[0]]
+
+        if (temp_candidate / (2 ** (1. / 53))) <= temp_tonic <= (temp_candidate * (2 ** (1. / 53))):
+            if self.tonic['estimated_tonic'] >= 400:
+                print "OCTAVE CORRECTED!!!!"
+                self.tonic = {"estimated_tonic": temp_candidate,
+                              "time_interval": [self.pitch_chunks[-self.counter][0][0],
+                                                self.pitch_chunks[-self.counter][-1][0]]}
+
+            if tonic_occurrence <= temp_candidate_occurence:
+                print "OCTAVE CORRECTED!!!!"
+
+                self.tonic = {"estimated_tonic": temp_candidate,
+                              "time_interval": [self.pitch_chunks[-self.counter][0][0],
+                                                self.pitch_chunks[-self.counter][-1][0]]}
+                print self.tonic
+        else: print "No octave correction!!!"
 
         if plot:
             self.plot_tonic()
             print last_note
             print self.tonic
             print sorted(self.peaks_list)
-
             plt.show()
 
         return self.tonic
@@ -226,6 +251,8 @@ class TonicLastNote(Histogram, Data):
         ax1.xaxis.set_major_formatter(FormatStrFormatter('%d'))
         # recording histogram
         ax1.plot(self.x, self.y, label='SongHist', ls='-', c='b', lw='1.5')
+        # peaks
+        ax1.plot(self.peaks['peaks'][0], self.peaks['peaks'][1], 'cD', ms=6, c='r')
         # tonic
         ax1.plot(self.tonic['estimated_tonic'],
                  self.y[where(self.x == self.tonic['estimated_tonic'])[0]], 'cD', ms=10)
