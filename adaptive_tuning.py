@@ -4,6 +4,7 @@ from synth_S import make_wav as synth_karplus
 from synth_A import make_wav as synth_sine
 from musicxml_reader import read_music_xml
 from tonic import TonicLastNote
+from numpy import log2
 
 import json
 
@@ -23,6 +24,7 @@ class AdaptiveTuning:
         self.theoretical_tonic = 0
         self.theoretical_pitches = {}
         self.adapted_histogram = {}
+        self.adapted_histogram_cent_difference = {}
         self.adapted_score = {'bpm': self.score['bpm'], 'score': []}
 
         self.out_path_1 = musicxml_score_path[:-4] + "-out1.wav"
@@ -66,12 +68,33 @@ class AdaptiveTuning:
             theo_freq = self.theoretical_histogram['{0}'.format(element)][0]
             candidate = self.find_nearest(self.peaks, theo_freq / ratio)
 
-            if (theo_freq / ratio) / 2 ** (3. / 53) <= candidate <= ((theo_freq / ratio) * 2 ** (3. / 53)):
+            if (theo_freq / ratio) / 2 ** (1. / 53) <= candidate <= ((theo_freq / ratio) * 2 ** (1. / 53)):
                 self.adapted_histogram['{0}'.format(element)] = int(candidate)
-                print "Yes!!!", candidate, theo_freq / ratio, ratio, theo_freq / candidate
+
+                cent = (log2((theo_freq / ratio) / candidate) * 1200)
+                self.adapted_histogram_cent_difference['{0}'.format(element)] = cent
+                print "Yes!!!", candidate, theo_freq / ratio, cent
             else:
-                self.adapted_histogram['{0}'.format(element)] = int(theo_freq / ratio)
-                print "No!!!", candidate, theo_freq / ratio, ratio, theo_freq / candidate
+                candidate_up = self.find_nearest(self.peaks, (theo_freq / ratio) * 2.)
+                candidate_down = self.find_nearest(self.peaks, (theo_freq / ratio) / 2.)
+
+                if ((2 * theo_freq) / ratio) / (2 ** (1. / 53)) <= candidate_up <= ((2 * theo_freq) / ratio) * (2 ** (1. / 53)):
+                    cent = log2(((theo_freq * 2.) / ratio) / candidate_up) * 1200
+                    self.adapted_histogram_cent_difference['{0}'.format(element)] = cent
+                    print "Yes Octave up!!!", candidate_up / 2., theo_freq / ratio, cent
+                    self.adapted_histogram['{0}'.format(element)] = int(candidate_up / 2.)
+
+                elif ((theo_freq / 2.) / ratio) / (2 ** (1. / 53)) <= candidate_down <= ((theo_freq / 2.) / ratio) * (2 ** (1. / 53)):
+                    cent = log2(((theo_freq / 2.) / ratio) / candidate_down) * 1200
+                    self.adapted_histogram_cent_difference['{0}'.format(element)] = cent
+                    print "Yes Octave down!!!", candidate_down * 2., theo_freq / ratio, ratio, theo_freq / candidate, cent
+                    self.adapted_histogram['{0}'.format(element)] = int(candidate_down * 2)
+
+                else:
+                    self.adapted_histogram['{0}'.format(element)] = int(theo_freq / ratio)
+                    cent = 0
+                    print "No!!!", candidate, theo_freq / ratio, ratio, theo_freq / candidate, cent
+                    self.adapted_histogram_cent_difference['{0}'.format(element)] = cent
 
         for element in self.adapted_histogram: print(element, self.theoretical_histogram['{0}'.format(element)][0],
                                                      self.adapted_histogram['{0}'.format(element)])
