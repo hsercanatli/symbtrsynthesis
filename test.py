@@ -8,7 +8,6 @@ from tonic import TonicLastNote
 
 def getFileNamesInDir(dir_name, ext=".mp3", skipFoldername=''):
     """
-
     :param dir_name:
     :param ext:
     :param skipFoldername:
@@ -33,7 +32,7 @@ def getFileNamesInDir(dir_name, ext=".mp3", skipFoldername=''):
 '''
 ext = PitchExtractMakam()
 
-mp3list, dump = getFileNamesInDir("/home/hsercanatli/Desktop/adaptive-test")
+mp3list, dump = getFileNamesInDir("/home/hsercanatli/Desktop/adaptive-test/saba", ext=".wav")
 
 for element in mp3list:
     print element
@@ -50,11 +49,7 @@ for element in mp3list:
         for p in pitch:
             f.write(str(p[0]) + "\t" + str(p[1]) + "\t" + str(p[2]) + "\n")
 
-#        f.write(str(pitch[0]))
-'''
-
-'''
-pitchlist, dump = getFileNamesInDir("/home/hsercanatli/Desktop/adaptive-test", ext=".json")
+pitchlist, dump = getFileNamesInDir("/home/hsercanatli/Desktop/adaptive-test/saba", ext=".json")
 
 for element in pitchlist:
     print element
@@ -67,7 +62,11 @@ for element in pitchlist:
     tnc.compute_tonic(plot=True)
 '''
 
+with open("/home/hsercanatli/Desktop/adaptive-test/saba/ornek1/47_saba_yildiz_a.g.kutbay)_ney.json") as f:
+    pitch = json.load(f)
+tnc = TonicLastNote(pitch)
+tnc.compute_tonic(plot=True)
 
-adapt = AdaptiveTuning(pitch_path="/home/hsercanatli/Desktop/adaptive-test/huzzam/Usta/2-01_huzzam_taksim.json",
-                       musicxml_score_path="/home/hsercanatli/Desktop/adaptive-test/huzzam/huzzam--pesrev--fahte----gazi_giray_han.xml")
+adapt = AdaptiveTuning(pitch_path="/home/hsercanatli/Desktop/adaptive-test/saba/ornek1/47_saba_yildiz_a.g.kutbay)_ney.json",
+                       musicxml_score_path="/home/hsercanatli/Desktop/adaptive-test/saba/ornek1/saba--sazsemaisi--aksaksemai----neyzen_aziz_dede.xml")
 adapt.adapt_score_frequencies(synth=True)

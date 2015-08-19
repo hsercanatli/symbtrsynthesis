@@ -7,7 +7,7 @@ from tonic import TonicLastNote
 from numpy import log2
 
 import json
-
+from operator import itemgetter
 
 class AdaptiveTuning:
     def __init__(self, pitch_path, musicxml_score_path):
@@ -18,6 +18,7 @@ class AdaptiveTuning:
         # tonic identification
         tonic_identifier = TonicLastNote(self.pitch)
         self.performed_tonic = tonic_identifier.compute_tonic()
+
         self.peaks = tonic_identifier.peaks_list
 
         self.theoretical_histogram = {}
@@ -29,6 +30,7 @@ class AdaptiveTuning:
 
         self.out_path_1 = musicxml_score_path[:-4] + "-out1.wav"
         self.out_path_2 = musicxml_score_path[:-4] + "-out2.wav"
+        self.out_path_intonation = musicxml_score_path[:-4] + "-intonation.txt"
 
     @staticmethod
     def find_nearest(array, value):
@@ -71,33 +73,40 @@ class AdaptiveTuning:
             if (theo_freq / ratio) / 2 ** (1. / 53) <= candidate <= ((theo_freq / ratio) * 2 ** (1. / 53)):
                 self.adapted_histogram['{0}'.format(element)] = int(candidate)
 
-                cent = (log2((theo_freq / ratio) / candidate) * 1200)
+                cent = -(log2((theo_freq / ratio) / candidate) * 1200)
                 self.adapted_histogram_cent_difference['{0}'.format(element)] = cent
-                print "Yes!!!", candidate, theo_freq / ratio, cent
+                print "Yes!!!", candidate, theo_freq / ratio, cent, element
             else:
                 candidate_up = self.find_nearest(self.peaks, (theo_freq / ratio) * 2.)
                 candidate_down = self.find_nearest(self.peaks, (theo_freq / ratio) / 2.)
 
-                if ((2 * theo_freq) / ratio) / (2 ** (1. / 53)) <= candidate_up <= ((2 * theo_freq) / ratio) * (2 ** (1. / 53)):
-                    cent = log2(((theo_freq * 2.) / ratio) / candidate_up) * 1200
+                if ((2 * theo_freq) / ratio) / (2 ** (2. / 53)) <= candidate_up <= ((2 * theo_freq) / ratio) * (2 ** (2. / 53)):
+                    cent = -log2(((theo_freq * 2.) / ratio) / candidate_up) * 1200
                     self.adapted_histogram_cent_difference['{0}'.format(element)] = cent
-                    print "Yes Octave up!!!", candidate_up / 2., theo_freq / ratio, cent
+                    print "Yes Octave up!!!", candidate_up / 2., theo_freq / ratio, cent, element
                     self.adapted_histogram['{0}'.format(element)] = int(candidate_up / 2.)
 
-                elif ((theo_freq / 2.) / ratio) / (2 ** (1. / 53)) <= candidate_down <= ((theo_freq / 2.) / ratio) * (2 ** (1. / 53)):
-                    cent = log2(((theo_freq / 2.) / ratio) / candidate_down) * 1200
+                elif ((theo_freq / 2.) / ratio) / (2 ** (2. / 53)) <= candidate_down <= ((theo_freq / 2.) / ratio) * (2 ** (2. / 53)):
+                    cent = -log2(((theo_freq / 2.) / ratio) / candidate_down) * 1200
                     self.adapted_histogram_cent_difference['{0}'.format(element)] = cent
-                    print "Yes Octave down!!!", candidate_down * 2., theo_freq / ratio, ratio, theo_freq / candidate, cent
+                    print "Yes Octave down!!!", candidate_down * 2., theo_freq / ratio, ratio, \
+                          theo_freq / candidate, cent, element
                     self.adapted_histogram['{0}'.format(element)] = int(candidate_down * 2)
 
                 else:
                     self.adapted_histogram['{0}'.format(element)] = int(theo_freq / ratio)
                     cent = 0
-                    print "No!!!", candidate, theo_freq / ratio, ratio, theo_freq / candidate, cent
+                    print "No!!!", candidate, theo_freq / ratio, ratio, theo_freq / candidate, cent, element
                     self.adapted_histogram_cent_difference['{0}'.format(element)] = cent
 
-        for element in self.adapted_histogram: print(element, self.theoretical_histogram['{0}'.format(element)][0],
-                                                     self.adapted_histogram['{0}'.format(element)])
+        with open(self.out_path_intonation, 'w') as f:
+            f.write("Note" + "\t" + "Theory(Hz)" + "\t" + "Adapted(Hz)" + "\t" + "Difference(cent)" + "\n")
+            for element in self.adapted_histogram:
+                f.write(element + "\t" +
+                        str(int(self.theoretical_histogram['{0}'.format(element)][0] / ratio)) + "\t" +
+                        str(self.adapted_histogram['{0}'.format(element)]) + "\t" +
+                        str(self.adapted_histogram_cent_difference['{0}'.format(element)]) + "\n")
+        f.close()
 
         for element in self.score['notes']:
             if element[0] != '__':
