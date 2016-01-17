@@ -36,33 +36,41 @@ class AdaptiveTuning:
         idx = distance.index(min(distance))
         return array[idx]
 
-    def compute_theoretical_histogram(self):
+    def compute_theoretical_histogram(self, score):
+        theoretical_histogram = {}
         total_length = 0
         # histogram computation
-        for i, x in enumerate(self.score['notes']):
+        for i, x in enumerate(score['notes']):
             try:
                 if not x[0] == '__':
-                    self.theoretical_histogram['{0}'.format(str(x[0]) + str(x[1]))][1] += float(x[3]) / x[4]
+                    theoretical_histogram['{0}'.format(str(x[0]) + str(x[1]))][1] += float(x[3]) / x[4]
                     total_length += float(x[3]) / x[4]
             except:
                 if not x[0] == '__':
-                    self.theoretical_histogram['{0}'.format(str(x[0]) + str(x[1]))] = [x[2], float(x[3] / x[4])]
+                    theoretical_histogram['{0}'.format(str(x[0]) + str(x[1]))] = [x[2], float(x[3] / x[4])]
                     total_length += float(x[3]) / x[4]
         # normalization
-        for element in self.theoretical_histogram: self.theoretical_histogram['{0}'.format(element)][1] /= total_length
+        for element in theoretical_histogram:
+            theoretical_histogram['{0}'.format(element)][1] /= total_length
 
-    def compute_score_tonic(self):
-        for i in range(1, len(self.score['notes'])):
-            if self.score['notes'][-i][0] != '__':
-                self.theoretical_tonic = self.score['notes'][-i][2]
-                print self.theoretical_tonic
+        return theoretical_histogram
+
+    def compute_score_tonic(self, score):
+        global theoretical_tonic
+        for i in range(1, len(score['notes'])):
+            if score['notes'][-i][0] != '__':
+                theoretical_tonic = score['notes'][-i][2]
+                print theoretical_tonic
                 break
+        return theoretical_tonic
 
-    def adapt_score_frequencies(self, synth=True):
-        self.compute_theoretical_histogram()
-        self.compute_score_tonic()
+    def adapt_score_frequencies(self, score, performed_tonic, synth=True):
+        performed_tonic = performed_tonic
 
-        ratio = float(self.theoretical_tonic) / self.performed_tonic['estimated_tonic']
+        theoretical_histogram = self.compute_theoretical_histogram(score=score)
+        theoretical_tonic = self.compute_score_tonic(score=score)
+
+        ratio = float(theoretical_tonic) / performed_tonic
 
         for element in self.theoretical_histogram:
             theo_freq = self.theoretical_histogram['{0}'.format(element)][0]
