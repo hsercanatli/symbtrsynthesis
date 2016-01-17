@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-__author__ = 'hsercanatli'
 
 from xml.etree.ElementTree import parse
 from fractions import Fraction
@@ -21,7 +20,7 @@ note_type_dict = {'whole': [2 ** 2, 1], 'half': [2 ** 1, 2], 'quarter': [2 ** 0,
 
 
 def read_music_xml(fname):
-    global pay, payda
+    global numerator, denominator
     notes = []
 
     tree = parse(fname)
@@ -35,6 +34,7 @@ def read_music_xml(fname):
     for note in root.findall('part/measure/note'):
         temp_note = []
 
+        # try-except for ornamentation
         try:
             dur = note.find('duration').text
 
@@ -51,13 +51,15 @@ def read_music_xml(fname):
                 acc = note.find('accidental').text
                 if type(acc) is type(None): acc = 0
                 else: acc = accidental_dict["{0}".format(acc)]
-            except: acc = 0
+            except:
+                acc = 0
 
             # type of note
             try:
                 note_type = note.find('type').text
                 note_ratio = note_type_dict['{0}'.format(note_type)][0]
                 note_payda = note_type_dict['{0}'.format(note_type)][1]
+
                 # dotted notes
                 try:
                     if type(note.find('dot').text):
@@ -65,15 +67,18 @@ def read_music_xml(fname):
                             ((44100. * 60 * note_ratio / bpm) / (int(q_note_len * float(dur) / divs) * 1e-3 * 44100.)),
                             ((int(q_note_len * float(dur) / divs) * 1e-3 * 44100.) /
                              (44100. * 60 / bpm * note_ratio))) / note_payda
-                        pay = int(Fraction(pay_payda).limit_denominator(100).numerator)
-                        payda = int(Fraction(pay_payda).limit_denominator(100).denominator)
+                        numerator = int(Fraction(pay_payda).limit_denominator(100).numerator)
+                        denominator = int(Fraction(pay_payda).limit_denominator(100).denominator)
 
                 except:
-                    pay = 1
-                    payda = note_type_dict['{0}'.format(note_type)][1]
+                    numerator = 1
+                    denominator = note_type_dict['{0}'.format(note_type)][1]
 
-            except: pass
-        except: pass
+            except:
+                pass
+
+        except:
+            print "ornamentation"
 
         # freq calculations
         freq = freq_dict['{0}'.format(step + octave)]
@@ -82,10 +87,11 @@ def read_music_xml(fname):
         temp_note.append(step + octave)
         temp_note.append(acc)
         temp_note.append(int(freq))
-        temp_note.append(pay)
-        temp_note.append(payda)
+        temp_note.append(numerator)
+        temp_note.append(denominator)
         temp_note.append(int(q_note_len * float(dur) * 1e-3 * 44100 / divs))
 
         notes.append(temp_note)
         count += 1
-    return {'notes': notes, 'bpm': bpm}
+    return {'notes': notes,
+            'bpm': bpm}
