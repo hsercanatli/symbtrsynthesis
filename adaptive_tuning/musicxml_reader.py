@@ -34,42 +34,45 @@ def read_music_xml(fname):
     count = 1
     for note in root.findall('part/measure/note'):
         temp_note = []
-        dur = note.find('duration').text
 
-        # step and octave information
         try:
-            step = note.find('pitch/step').text
-            octave = note.find('pitch/octave').text
-        except:
-            step = '_'
-            octave = '_'
+            dur = note.find('duration').text
 
-        # accidentals information
-        try:
-            acc = note.find('accidental').text
-            if type(acc) is type(None): acc = 0
-            else: acc = accidental_dict["{0}".format(acc)]
-        except: acc = 0
-
-        # type of note
-        try:
-            note_type = note.find('type').text
-            note_ratio = note_type_dict['{0}'.format(note_type)][0]
-            note_payda = note_type_dict['{0}'.format(note_type)][1]
-            # dotted notes
+            # step and octave information
             try:
-                if type(note.find('dot').text):
-                    pay_payda = max(
-                        ((44100. * 60 * note_ratio / bpm) / (int(q_note_len * float(dur) / divs) * 1e-3 * 44100.)),
-                        ((int(q_note_len * float(dur) / divs) * 1e-3 * 44100.) /
-                         (44100. * 60 / bpm * note_ratio))) / note_payda
-                    pay = int(Fraction(pay_payda).limit_denominator(100).numerator)
-                    payda = int(Fraction(pay_payda).limit_denominator(100).denominator)
-
+                step = note.find('pitch/step').text
+                octave = note.find('pitch/octave').text
             except:
-                pay = 1
-                payda = note_type_dict['{0}'.format(note_type)][1]
+                step = '_'
+                octave = '_'
 
+            # accidentals information
+            try:
+                acc = note.find('accidental').text
+                if type(acc) is type(None): acc = 0
+                else: acc = accidental_dict["{0}".format(acc)]
+            except: acc = 0
+
+            # type of note
+            try:
+                note_type = note.find('type').text
+                note_ratio = note_type_dict['{0}'.format(note_type)][0]
+                note_payda = note_type_dict['{0}'.format(note_type)][1]
+                # dotted notes
+                try:
+                    if type(note.find('dot').text):
+                        pay_payda = max(
+                            ((44100. * 60 * note_ratio / bpm) / (int(q_note_len * float(dur) / divs) * 1e-3 * 44100.)),
+                            ((int(q_note_len * float(dur) / divs) * 1e-3 * 44100.) /
+                             (44100. * 60 / bpm * note_ratio))) / note_payda
+                        pay = int(Fraction(pay_payda).limit_denominator(100).numerator)
+                        payda = int(Fraction(pay_payda).limit_denominator(100).denominator)
+
+                except:
+                    pay = 1
+                    payda = note_type_dict['{0}'.format(note_type)][1]
+
+            except: pass
         except: pass
 
         # freq calculations

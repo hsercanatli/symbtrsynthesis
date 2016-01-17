@@ -1,5 +1,3 @@
-__author__ = 'hasan'
-
 import wave
 import math
 import struct

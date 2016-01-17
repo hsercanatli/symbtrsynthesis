@@ -1,5 +1,3 @@
-__author__ = 'hasan'
-
 import wave
 import numpy as np
 from math import cos, pi, log, floor, ceil
@@ -7,7 +5,7 @@ from math import cos, pi, log, floor, ceil
 
 def make_wav(inp, transpose=0, pause=0.,
              repeat=0, fn="out.wav", silent=False):
-    print inp.keys()
+
     # wave settings
     f = wave.open(fn, 'w')
 
