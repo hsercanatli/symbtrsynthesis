@@ -1,13 +1,11 @@
 __author__ = 'hsercanatli'
 
-from synth_S import make_wav as synth_karplus
-from synth_A import make_wav as synth_sine
-from musicxml_reader import read_music_xml
-from tonic import TonicLastNote
 from numpy import log2
+from synthesizer import *
 
-import json
-from operator import itemgetter
+from musicxml_reader import read_music_xml
+from tonic_identifier.tonic_identifier import TonicLastNote
+
 
 class AdaptiveTuning:
     def __init__(self, pitch_path, musicxml_score_path):
