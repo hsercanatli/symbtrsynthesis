@@ -1,12 +1,12 @@
 __author__ = 'hsercanatli'
 
 from numpy import log2
-from synthesizer import *
+from .. synthesizer import *
 
-from musicxml_reader import read_music_xml
+from .. musicxml_reader import read_music_xml
 
 
-class AdaptiveTuning:
+class Tuner:
     def __init__(self):
         pass
 
