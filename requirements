@@ -1,0 +1,3 @@
+numpy
+git+https://github.com/hsercanatli/pitch-post-filter.git
+git+https://github.com/hsercanatli/tonic_identifier.git
