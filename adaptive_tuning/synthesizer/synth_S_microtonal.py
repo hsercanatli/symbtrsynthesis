@@ -72,7 +72,7 @@ def make_wav(inp, transpose=0, pause=0.,
     data = np.zeros((repeat + 1) * t_len + 20. * 44100.)
 
     for rp in range(repeat + 1):
-        print inp['notes']
+        #print inp['notes']
         for nn, x in enumerate(inp['notes']):
 
             if not nn % 10 and silent == False:

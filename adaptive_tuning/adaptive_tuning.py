@@ -43,7 +43,7 @@ class AdaptiveTuning:
         for i in range(1, len(score['notes'])):
             if score['notes'][-i][0] != '__':
                 theoretical_tonic = score['notes'][-i][2]
-                print theoretical_tonic
+                #print theoretical_tonic
                 break
         return theoretical_tonic
 
@@ -76,14 +76,14 @@ class AdaptiveTuning:
                             2 ** (1. / 53)):
                     cent = -log2(((theo_freq * 2.) / ratio) / candidate_up) * 1200
                     adapted_histogram_cent_difference['{0}'.format(element)] = cent
-                    print "Yes Octave up!!!", candidate_up / 2., theo_freq / ratio, cent, element
+                    print "Yes, up!!!", candidate_up / 2., theo_freq / ratio, cent, element
                     adapted_histogram['{0}'.format(element)] = int(candidate_up / 2.)
 
                 elif ((theo_freq / 1.) / ratio) / (2 ** (1. / 53)) <= candidate_down <= ((theo_freq / 1.) / ratio) * (
                             2 ** (1. / 53)):
                     cent = -log2(((theo_freq / 2.) / ratio) / candidate_down) * 1200
                     adapted_histogram_cent_difference['{0}'.format(element)] = cent
-                    print "Yes Octave down!!!", candidate_down * 2., theo_freq / ratio, ratio, \
+                    print "Yes, down!!!", candidate_down * 2., theo_freq / ratio, ratio, \
                         theo_freq / candidate, cent, element
                     adapted_histogram['{0}'.format(element)] = int(candidate_down * 2)
 
@@ -112,8 +112,8 @@ class AdaptiveTuning:
 
     @staticmethod
     def make_wav(score, fn):
-        fn_karplus = fn + "-karplus.wav"
-        fn_sine = fn + "-sine.wav"
+        fn_karplus = fn + "--adapted_karplus.wav"
+        fn_sine = fn + "--adapted_sine.wav"
 
         synth_karplus(score, fn=fn_karplus)
         synth_sine(score, fn=fn_sine)

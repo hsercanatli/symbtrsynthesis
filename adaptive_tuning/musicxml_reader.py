@@ -34,7 +34,7 @@ def read_music_xml(fname):
     for note in root.findall('part/measure/note'):
         temp_note = []
 
-        # try-except for ornamentation
+        # try-except to ignore ornamentations
         try:
             dur = note.find('duration').text
 
@@ -78,7 +78,7 @@ def read_music_xml(fname):
                 pass
 
         except:
-            print "ornamentation"
+            print "ornamentation is ignored"
 
         # freq calculations
         freq = freq_dict['{0}'.format(step + octave)]
