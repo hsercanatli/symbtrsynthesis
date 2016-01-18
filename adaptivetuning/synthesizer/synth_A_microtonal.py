@@ -62,7 +62,8 @@ def make_wav(data, transpose=0, pause=.05, repeat=0, fn="out.wav", silent=False,
         return q + fill
 
     if not silent:
-        print "Writing to file", fn
+        if verbose:
+            print "Writing to file", fn
     curpos = 0
     ex_pos = 0.
     for rp in range(repeat + 1):

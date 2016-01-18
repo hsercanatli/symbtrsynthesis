@@ -98,7 +98,8 @@ def make_wav(inp, transpose=0, pause=0.,
                 ex_pos += b
 
     if not silent:
-        print "Writing to file", fn
+        if verbose:
+            print "Writing to file", fn
 
     data /= data.max() * 2.
     out_len = int(2. * 44100. + ex_pos + .5)
