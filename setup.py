@@ -7,5 +7,5 @@ setup(name='makamadaptivetuning',
       description='A Synthesizer and an adaptive tuner for SymbTr files',
       author='Hasan Sercan Atli',
       url='https://github.com/hsercanatli/adaptive-tuning',
-      packages=['makamadaptivetuning']
+      packages=['adaptivetuning']
       )
