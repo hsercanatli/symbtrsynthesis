@@ -3,32 +3,13 @@ __author__ = 'hsercanatli'
 from numpy import log2
 from synthesizer import *
 
-from musicxml_reader import read_music_xml
-from tonic_identifier.tonic_identifier import TonicLastNote
-
 
 class AdaptiveTuning:
-    def __init__(self, pitch_path, musicxml_score_path):
-        # reading pitch and music-xml score
-        with open(pitch_path) as f: self.pitch = json.load(f)
-        self.score = read_music_xml(musicxml_score_path)
-
-        # tonic identification
-        tonic_identifier = TonicLastNote(self.pitch)
-        self.performed_tonic = tonic_identifier.compute_tonic()
-
-        self.peaks = tonic_identifier.peaks_list
-
-        self.theoretical_histogram = {}
-        self.theoretical_tonic = 0
-        self.theoretical_pitches = {}
-        self.adapted_histogram = {}
-        self.adapted_histogram_cent_difference = {}
-        self.adapted_score = {'bpm': self.score['bpm'], 'score': []}
-
-        self.out_path_1 = musicxml_score_path[:-4] + "-out1.wav"
-        self.out_path_2 = musicxml_score_path[:-4] + "-out2.wav"
-        self.out_path_intonation = musicxml_score_path[:-4] + "-intonation.txt"
+    def __init__(self):
+        pass
+        #self.out_path_1 = musicxml_score_path[:-4] + "-out1.wav"
+        #self.out_path_2 = musicxml_score_path[:-4] + "-out2.wav"
+        #self.out_path_intonation = musicxml_score_path[:-4] + "-intonation.txt"
 
     @staticmethod
     def find_nearest(array, value):
@@ -36,9 +17,11 @@ class AdaptiveTuning:
         idx = distance.index(min(distance))
         return array[idx]
 
-    def compute_theoretical_histogram(self, score):
+    @staticmethod
+    def compute_theoretical_histogram(score):
         theoretical_histogram = {}
         total_length = 0
+
         # histogram computation
         for i, x in enumerate(score['notes']):
             try:
@@ -49,13 +32,15 @@ class AdaptiveTuning:
                 if not x[0] == '__':
                     theoretical_histogram['{0}'.format(str(x[0]) + str(x[1]))] = [x[2], float(x[3] / x[4])]
                     total_length += float(x[3]) / x[4]
+
         # normalization
         for element in theoretical_histogram:
             theoretical_histogram['{0}'.format(element)][1] /= total_length
 
         return theoretical_histogram
 
-    def compute_score_tonic(self, score):
+    @staticmethod
+    def compute_score_tonic(score):
         global theoretical_tonic
         for i in range(1, len(score['notes'])):
             if score['notes'][-i][0] != '__':
@@ -64,63 +49,69 @@ class AdaptiveTuning:
                 break
         return theoretical_tonic
 
-    def adapt_score_frequencies(self, score, performed_tonic, synth=True):
-        performed_tonic = performed_tonic
+    def adapt_score_frequencies(self, score, performed_tonic, stable_pitches, synth=True, out_path='out.wav'):
+        adapted_histogram = {}
+        adapted_histogram_cent_difference = {}
 
         theoretical_histogram = self.compute_theoretical_histogram(score=score)
         theoretical_tonic = self.compute_score_tonic(score=score)
 
         ratio = float(theoretical_tonic) / performed_tonic
 
-        for element in self.theoretical_histogram:
-            theo_freq = self.theoretical_histogram['{0}'.format(element)][0]
-            candidate = self.find_nearest(self.peaks, theo_freq / ratio)
+        for element in theoretical_histogram:
+            theo_freq = theoretical_histogram['{0}'.format(element)][0]
+            candidate = self.find_nearest(stable_pitches, theo_freq / ratio)
 
             if (theo_freq / ratio) / 2 ** (1. / 53) <= candidate <= ((theo_freq / ratio) * 2 ** (1. / 53)):
-                self.adapted_histogram['{0}'.format(element)] = int(candidate)
+                adapted_histogram['{0}'.format(element)] = int(candidate)
 
                 cent = -(log2((theo_freq / ratio) / candidate) * 1200)
-                self.adapted_histogram_cent_difference['{0}'.format(element)] = cent
+                adapted_histogram_cent_difference['{0}'.format(element)] = cent
                 print "Yes!!!", candidate, theo_freq / ratio, cent, element
             else:
-                candidate_up = self.find_nearest(self.peaks, (theo_freq / ratio) * 2.)
-                candidate_down = self.find_nearest(self.peaks, (theo_freq / ratio) / 2.)
+                candidate_up = self.find_nearest(performed_tonic, (theo_freq / ratio) * 2.)
+                candidate_down = self.find_nearest(performed_tonic, (theo_freq / ratio) / 2.)
 
                 if ((2 * theo_freq) / ratio) / (2 ** (2. / 53)) <= candidate_up <= ((2 * theo_freq) / ratio) * (2 ** (2. / 53)):
                     cent = -log2(((theo_freq * 2.) / ratio) / candidate_up) * 1200
-                    self.adapted_histogram_cent_difference['{0}'.format(element)] = cent
+                    adapted_histogram_cent_difference['{0}'.format(element)] = cent
                     print "Yes Octave up!!!", candidate_up / 2., theo_freq / ratio, cent, element
-                    self.adapted_histogram['{0}'.format(element)] = int(candidate_up / 2.)
+                    adapted_histogram['{0}'.format(element)] = int(candidate_up / 2.)
 
                 elif ((theo_freq / 2.) / ratio) / (2 ** (2. / 53)) <= candidate_down <= ((theo_freq / 2.) / ratio) * (2 ** (2. / 53)):
                     cent = -log2(((theo_freq / 2.) / ratio) / candidate_down) * 1200
-                    self.adapted_histogram_cent_difference['{0}'.format(element)] = cent
+                    adapted_histogram_cent_difference['{0}'.format(element)] = cent
                     print "Yes Octave down!!!", candidate_down * 2., theo_freq / ratio, ratio, \
                           theo_freq / candidate, cent, element
-                    self.adapted_histogram['{0}'.format(element)] = int(candidate_down * 2)
+                    adapted_histogram['{0}'.format(element)] = int(candidate_down * 2)
 
                 else:
-                    self.adapted_histogram['{0}'.format(element)] = int(theo_freq / ratio)
+                    adapted_histogram['{0}'.format(element)] = int(theo_freq / ratio)
                     cent = 0
                     print "No!!!", candidate, theo_freq / ratio, ratio, theo_freq / candidate, cent, element
-                    self.adapted_histogram_cent_difference['{0}'.format(element)] = cent
+                    adapted_histogram_cent_difference['{0}'.format(element)] = cent
 
-        with open(self.out_path_intonation, 'w') as f:
-            f.write("Note" + "\t" + "Theory(Hz)" + "\t" + "Adapted(Hz)" + "\t" + "Difference(cent)" + "\n")
-            for element in self.adapted_histogram:
-                f.write(element + "\t" +
-                        str(int(self.theoretical_histogram['{0}'.format(element)][0] / ratio)) + "\t" +
-                        str(self.adapted_histogram['{0}'.format(element)]) + "\t" +
-                        str(self.adapted_histogram_cent_difference['{0}'.format(element)]) + "\n")
-        f.close()
+        #with open(self.out_path_intonation, 'w') as f:
+        #    f.write("Note" + "\t" + "Theory(Hz)" + "\t" + "Adapted(Hz)" + "\t" + "Difference(cent)" + "\n")
+        #    for element in self.adapted_histogram:
+        #        f.write(element + "\t" +
+        #                str(int(self.theoretical_histogram['{0}'.format(element)][0] / ratio)) + "\t" +
+        #                str(self.adapted_histogram['{0}'.format(element)]) + "\t" +
+        #                str(self.adapted_histogram_cent_difference['{0}'.format(element)]) + "\n")
 
-        for element in self.score['notes']:
+        for element in score['notes']:
             if element[0] != '__':
-                element[2] = self.adapted_histogram['{0}'.format(element[0] + str(element[1]))]
+                element[2] = adapted_histogram['{0}'.format(element[0] + str(element[1]))]
 
-        if synth: self.make_wav()
-        return self.theoretical_histogram, self.adapted_histogram
+        if synth:
+            self.make_wav(score=score, fn=out_path)
 
-    def make_wav(self):
-        synth_karplus(self.score, fn=self.out_path_1)
-        synth_sine(self.score, fn=self.out_path_2)
+        return theoretical_histogram, adapted_histogram
+
+    @staticmethod
+    def make_wav(score, fn):
+        fn_karplus = fn + "-karplus.wav"
+        fn_sine = fn + "-sine.wav"
+
+        synth_karplus(score, fn=fn_karplus)
+        synth_sine(score, fn=fn_sine)
