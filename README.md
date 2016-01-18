@@ -1,27 +1,27 @@
 # adaptivetuning
 This repository hosts the implementations of an adaptive tuning method and a synthesizer for [SymbTr](https://github.com/MTG/SymbTr) scores.
 
-The user can synthesize a score w.r.t. the performed pitches of a related recording or the user can directly synthesize a SymbTr score with the theoretical intervals.
+The user can synthesize synthesize a SymbTr score in MusicXML format with the theoretical intervals or according to a tuning extracted from the performed pitches of a related recording.
 
-Usage of synthesizing a score with theoretical intervals
+This repository hosts the the implementation of the adaptive tuning/synthesis proposed in:
+
+_Şentürk, S., Holzapfel, A., and Serra, X. (2012). An approach for linking score and audio recordings in makam music of Turkey. In Proceedings of 2nd CompMusic Workshop, pages 95–106, Istanbul, Turkey._
+
+If you are using this extractor please cite the above paper. 
+
+Synthesizing a score with theoretical intervals
 =======
 ```python
 from adaptivetuning.synthesizer.synth_symbtr import synth_symbtr
 
-# This function synthesizes the score according to the theoretical intervals.
-# It takes a time w.r.t. the length of given SymbTr. 
-# If you want to observe the status of the process, give "verbose" flag as true.
-# Possible synth types are 'sine' and 'karplus' 
-# 'Sine' option takes less time.
+synth_symbtr(musicxml_path="sampledata/saba--ornek_oz--sofyan--2--ruhi_ayangil/saba--ornek_oz--sofyan--2--ruhi_ayangil.xml",
+             out='out.wav', type='karplus', verbose=False)
 
 synth_symbtr(musicxml_path="sampledata/saba--ornek_oz--sofyan--2--ruhi_ayangil/saba--ornek_oz--sofyan--2--ruhi_ayangil.xml",
-             type='karplus', verbose=False)
-
-synth_symbtr(musicxml_path="sampledata/saba--ornek_oz--sofyan--2--ruhi_ayangil/saba--ornek_oz--sofyan--2--ruhi_ayangil.xml",
-             type='sine', verbose=True, out='out.wav')
+             out='out.wav', type='sine', verbose=True, out='out.wav')
 ```
 
-Usage of synthesizing a score with performed intervals
+Synthesizing a score according to a performance
 =======
 ```python
 import json
@@ -31,26 +31,21 @@ from tonic_identifier.tonic_identifier import TonicLastNote
 from adaptivetuning.tuner.tuner import Tuner
 from adaptivetuning.synthesizer.synth_symbtr import synth_symbtr
 
-# loading extracted pitch of a related recording of the selected SymbTr for adaptive tuning
+# load extracted pitch of a related recording of the selected SymbTr for adaptive tuning
+# You can use predominantmelodymakam (https://github.com/sertansenturk/predominantmelodymakam) to compute the pitch track
 pitch = json.load(open("sampledata/huseyni--sazsemaisi--aksaksemai----tatyos_efendi/8b8d697b-cad9-446e-ad19-5e85a36aa253.json", 'r'))['pitch']
 
 # Post process the pitch track to get rid of spurious pitch estimations and correct octave errors
 flt = PitchPostFilter()
 pitch = flt.run(pitch)
 
-# identification of the tonic for the related recording of SymbTr
-
+# identify the tonic for the related recording of SymbTr
 tnc = TonicLastNote()
 tonic, pitch, pitch_chunks, pitch_distribution, stable_pitches = tnc.identify(pitch)
 
-# Adapting the tuning and synthesizing the SymbTr
-# This part synthesizes the score according to the related audio recording. 
-# Extracted stable pitches are used as reference in synth function.
-# It takes a time w.r.t. the length of given SymbTr. If you want to obseve the status of the process, give "verbose" flag as true.
-# Possible synth types are 'sine' and 'karplus' 'Sine' option takes less time.
-
-adapt = Tuner()
-theoretical_histogram, adapted_histogram = adapt.adapt_score_frequencies(musicxml_path="sampledata/huseyni--sazsemaisi--aksaksemai----tatyos_efendi/huseyni--sazsemaisi--aksaksemai----tatyos_efendi.xml",
+# Adapt the tuning and synthesizing the SymbTr
+tuner = Tuner()
+theoretical_histogram, adapted_histogram = tuner.adapt_score_frequencies(musicxml_path="sampledata/huseyni--sazsemaisi--aksaksemai----tatyos_efendi/huseyni--sazsemaisi--aksaksemai----tatyos_efendi.xml",
                                                                          performed_tonic=tonic['value'],
                                                                          stable_pitches=stable_pitches,
                                                                          type='karplus',
