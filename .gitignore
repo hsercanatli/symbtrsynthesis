@@ -3,3 +3,4 @@ test.py
 /.idea
 *.wav
 *.mp3
+/.ipynb_checkpoints
