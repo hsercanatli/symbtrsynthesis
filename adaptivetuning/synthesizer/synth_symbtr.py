@@ -2,7 +2,7 @@ from .. synthesizer import *
 from .. musicxml_reader import read_music_xml
 
 
-def synth_symbtr(musicxml_path, type='sine', out=''):
+def synth_symbtr(musicxml_path, type='sine', out='', verbose=False):
     score = read_music_xml(musicxml_path)
 
     if not out:
@@ -10,7 +10,7 @@ def synth_symbtr(musicxml_path, type='sine', out=''):
         if type == 'karplus': out = musicxml_path[:-4] + "--karplus.wav"
 
     if type == 'sine':
-        synth_sine(score, fn=out)
+        synth_sine(score, fn=out, verbose=verbose)
 
     if type == 'karplus':
-        synth_karplus(score, fn=out)
+        synth_karplus(score, fn=out, verbose=verbose)

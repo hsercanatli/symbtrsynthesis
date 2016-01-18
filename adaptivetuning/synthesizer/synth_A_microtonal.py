@@ -5,7 +5,7 @@ import struct
 harm_max = 4.
 
 
-def make_wav(data, transpose=0, pause=.05, repeat=0, fn="out.wav", silent=False):
+def make_wav(data, transpose=0, pause=.05, repeat=0, fn="out.wav", silent=False, verbose=False):
     # wave settings
     f = wave.open(fn, 'w')
 
@@ -67,7 +67,8 @@ def make_wav(data, transpose=0, pause=.05, repeat=0, fn="out.wav", silent=False)
     ex_pos = 0.
     for rp in range(repeat + 1):
         for nn, x in enumerate(data['notes']):
-            if nn % 10 == 0: print "[{0}/{1}]".format(nn+1, len(data["notes"]))
+            if verbose:
+                if nn % 10 == 0: print "[{0}/{1}]".format(nn+1, len(data["notes"]))
             if x[0] != '__' and int(x[3]) != 0 and int(x[4]) != 0:
 
                 vol = 1.  # volume

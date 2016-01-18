@@ -4,7 +4,7 @@ from math import cos, pi, log, floor, ceil
 
 
 def make_wav(inp, transpose=0, pause=0.,
-             repeat=0, fn="out.wav", silent=False):
+             repeat=0, fn="out.wav", silent=False, verbose=False):
 
     # wave settings
     f = wave.open(fn, 'w')
@@ -74,9 +74,8 @@ def make_wav(inp, transpose=0, pause=0.,
     for rp in range(repeat + 1):
         #print inp['notes']
         for nn, x in enumerate(inp['notes']):
-
-            if not nn % 10 and silent == False:
-                print "[%u/%u]\t" % (nn + 1, len(inp['notes']))
+            if verbose:
+                if not nn % 10 and silent == False: print "[%u/%u]\t" % (nn + 1, len(inp['notes']))
 
             # and int(x[4]) != 0 and int(x[5]) != 0:
             if x[0] != '__' and int(x[3]) != 0 and int(x[4]) != 0:
