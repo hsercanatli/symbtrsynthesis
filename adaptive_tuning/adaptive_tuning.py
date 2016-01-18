@@ -2,14 +2,12 @@ __author__ = 'hsercanatli'
 
 from numpy import log2
 from synthesizer import *
+from musicxml_reader import read_music_xml
 
 
 class AdaptiveTuning:
     def __init__(self):
         pass
-        #self.out_path_1 = musicxml_score_path[:-4] + "-out1.wav"
-        #self.out_path_2 = musicxml_score_path[:-4] + "-out2.wav"
-        #self.out_path_intonation = musicxml_score_path[:-4] + "-intonation.txt"
 
     @staticmethod
     def find_nearest(array, value):
@@ -49,7 +47,9 @@ class AdaptiveTuning:
                 break
         return theoretical_tonic
 
-    def adapt_score_frequencies(self, score, performed_tonic, stable_pitches, synth=True, out_path='out.wav'):
+    def adapt_score_frequencies(self, musicxml_path, performed_tonic, stable_pitches, synth=True):
+        score = read_music_xml(musicxml_path)
+
         adapted_histogram = {}
         adapted_histogram_cent_difference = {}
 
@@ -69,20 +69,22 @@ class AdaptiveTuning:
                 adapted_histogram_cent_difference['{0}'.format(element)] = cent
                 print "Yes!!!", candidate, theo_freq / ratio, cent, element
             else:
-                candidate_up = self.find_nearest(performed_tonic, (theo_freq / ratio) * 2.)
-                candidate_down = self.find_nearest(performed_tonic, (theo_freq / ratio) / 2.)
+                candidate_up = self.find_nearest(stable_pitches, (theo_freq / ratio) * 2.)
+                candidate_down = self.find_nearest(stable_pitches, (theo_freq / ratio) / 2.)
 
-                if ((2 * theo_freq) / ratio) / (2 ** (2. / 53)) <= candidate_up <= ((2 * theo_freq) / ratio) * (2 ** (2. / 53)):
+                if ((2 * theo_freq) / ratio) / (2 ** (1. / 53)) <= candidate_up <= ((2 * theo_freq) / ratio) * (
+                            2 ** (1. / 53)):
                     cent = -log2(((theo_freq * 2.) / ratio) / candidate_up) * 1200
                     adapted_histogram_cent_difference['{0}'.format(element)] = cent
                     print "Yes Octave up!!!", candidate_up / 2., theo_freq / ratio, cent, element
                     adapted_histogram['{0}'.format(element)] = int(candidate_up / 2.)
 
-                elif ((theo_freq / 2.) / ratio) / (2 ** (2. / 53)) <= candidate_down <= ((theo_freq / 2.) / ratio) * (2 ** (2. / 53)):
+                elif ((theo_freq / 1.) / ratio) / (2 ** (1. / 53)) <= candidate_down <= ((theo_freq / 1.) / ratio) * (
+                            2 ** (1. / 53)):
                     cent = -log2(((theo_freq / 2.) / ratio) / candidate_down) * 1200
                     adapted_histogram_cent_difference['{0}'.format(element)] = cent
                     print "Yes Octave down!!!", candidate_down * 2., theo_freq / ratio, ratio, \
-                          theo_freq / candidate, cent, element
+                        theo_freq / candidate, cent, element
                     adapted_histogram['{0}'.format(element)] = int(candidate_down * 2)
 
                 else:
@@ -91,7 +93,7 @@ class AdaptiveTuning:
                     print "No!!!", candidate, theo_freq / ratio, ratio, theo_freq / candidate, cent, element
                     adapted_histogram_cent_difference['{0}'.format(element)] = cent
 
-        #with open(self.out_path_intonation, 'w') as f:
+        # with open(self.out_path_intonation, 'w') as f:
         #    f.write("Note" + "\t" + "Theory(Hz)" + "\t" + "Adapted(Hz)" + "\t" + "Difference(cent)" + "\n")
         #    for element in self.adapted_histogram:
         #        f.write(element + "\t" +
@@ -104,7 +106,7 @@ class AdaptiveTuning:
                 element[2] = adapted_histogram['{0}'.format(element[0] + str(element[1]))]
 
         if synth:
-            self.make_wav(score=score, fn=out_path)
+            self.make_wav(score=score, fn=musicxml_path[:-4])
 
         return theoretical_histogram, adapted_histogram
 
