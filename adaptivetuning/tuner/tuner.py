@@ -48,7 +48,7 @@ class Tuner:
                 break
         return theoretical_tonic
 
-    def adapt_score_frequencies(self, musicxml_path, performed_tonic, stable_pitches, synth=True):
+    def adapt_score_frequencies(self, musicxml_path, performed_tonic, stable_pitches, type='sine', out=''):
         score = read_music_xml(musicxml_path)
 
         adapted_histogram = {}
@@ -106,15 +106,19 @@ class Tuner:
             if element[0] != '__':
                 element[2] = adapted_histogram['{0}'.format(element[0] + str(element[1]))]
 
-        if synth:
-            self.make_wav(score=score, fn=musicxml_path[:-4])
+        if not out:
+            if type == 'sine': out = musicxml_path[:-4] + "--adapted_sine.wav"
+            if type == 'karplus': out = musicxml_path[:-4] + "--adapted_karplus.wav"
+
+        self.make_wav(score=score, type=type, fn=out)
 
         return theoretical_histogram, adapted_histogram
 
     @staticmethod
-    def make_wav(score, fn):
-        fn_karplus = fn + "--adapted_karplus.wav"
-        fn_sine = fn + "--adapted_sine.wav"
+    def make_wav(score, fn, type):
 
-        synth_karplus(score, fn=fn_karplus)
-        synth_sine(score, fn=fn_sine)
+        if type == 'sine':
+            synth_sine(score, fn=fn)
+
+        if type == 'karplus':
+            synth_karplus(score, fn=fn)
