@@ -4,3 +4,5 @@ test.py
 *.wav
 *.mp3
 /.ipynb_checkpoints
+*.egg-info
+.DS_Store
