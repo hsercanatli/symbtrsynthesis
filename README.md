@@ -27,7 +27,7 @@ Usage of synthesizing a score with performed intervals
 import json
 
 from pitchfilter.pitchfilter import PitchPostFilter
-from tonic_identifier.tonic_identifier import TonicLastNote
+from tonicidentifier.tonicidentifier import TonicLastNote
 from adaptivetuning.tuner.tuner import Tuner
 from adaptivetuning.synthesizer.synth_symbtr import synth_symbtr
 
