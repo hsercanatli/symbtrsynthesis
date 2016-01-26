@@ -1,4 +1,4 @@
-# This algorithm is a modified version of algorithm hosted in
+# This algorithm is a modified version of the algorithm hosted in
 # https://github.com/mdoege/PySynth/blob/master/pysynth.py written by Martin C. Doege
 # v1.1.2, commit 57a58d5 on Jul 21, 2012
 
