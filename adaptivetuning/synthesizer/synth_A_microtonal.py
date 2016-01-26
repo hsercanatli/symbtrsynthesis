@@ -1,6 +1,6 @@
 # This algorithm is a modified version of the algorithm hosted in
 # https://github.com/mdoege/PySynth/blob/master/pysynth.py written by Martin C. Doege
-# v1.1.2, commit 57a58d5 on Jul 21, 2012
+# v1.1.2, commit 57a58d5 on Jul 21, 2012. The original code is licenced under the GPL.
 
 import wave
 import math
