@@ -5,7 +5,7 @@ The user can synthesize a SymbTr score in MusicXML format with the theoretical i
 
 The synthesizer algorithms are modified versions of the PySynth algorithms hosted in https://mdoege.github.io/PySynth/.
 
-This repository hosts the the implementation of the adaptive tuning/synthesis proposed in:
+This repository hosts the implementation of the adaptive tuning/synthesis proposed in:
 
 _Şentürk, S., Holzapfel, A., and Serra, X. (2012). An approach for linking score and audio recordings in makam music of Turkey. In Proceedings of 2nd CompMusic Workshop, pages 95–106, Istanbul, Turkey._
 
