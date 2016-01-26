@@ -82,7 +82,7 @@ Then you can install the rest of the dependencies:
 
 Additional Code
 -------
-The synthesis algorihtms [synth_A_microtonal.py](https://github.com/hsercanatli/adaptivetuning/blob/master/adaptivetuning/synthesizer/synth_A_microtonal.py) and [synth_S_microtonal.py](https://github.com/hsercanatli/adaptivetuning/blob/master/adaptivetuning/synthesizer/synth_S_microtonal.py) are derived from [Martin C. Doege](mdoege@compuserve.com)'s synthesis tools hosted in [PySynth](https://github.com/mdoege/PySynth/). Please see the respective files for more detail.
+The synthesis algorithms [synth_A_microtonal.py](https://github.com/hsercanatli/adaptivetuning/blob/master/adaptivetuning/synthesizer/synth_A_microtonal.py) and [synth_S_microtonal.py](https://github.com/hsercanatli/adaptivetuning/blob/master/adaptivetuning/synthesizer/synth_S_microtonal.py) are derived from [Martin C. Doege](https://github.com/mdoege/)'s synthesis tools hosted in [PySynth](https://github.com/mdoege/PySynth/). Please see the respective files for more detail.
 
 Authors
 -------
