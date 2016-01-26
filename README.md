@@ -3,13 +3,11 @@ This repository hosts the implementations of an adaptive tuning method and a syn
 
 The user can synthesize a SymbTr score in MusicXML format with the theoretical intervals or according to a tuning extracted from the performed pitches of a related recording.
 
-The synthesizer algorithms are modified versions of the PySynth algorithms hosted in https://mdoege.github.io/PySynth/.
-
-This repository hosts the implementation of the adaptive tuning/synthesis proposed in:
+This repository hosts the implementation of the adaptive tuning proposed in:
 
 _Şentürk, S., Holzapfel, A., and Serra, X. (2012). An approach for linking score and audio recordings in makam music of Turkey. In Proceedings of 2nd CompMusic Workshop, pages 95–106, Istanbul, Turkey._
 
-If you are using this extractor please cite the above paper. 
+If you are using this code, please cite the above paper. 
 
 Synthesizing a score with theoretical intervals
 =======
