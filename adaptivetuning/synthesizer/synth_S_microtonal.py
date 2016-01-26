@@ -1,3 +1,5 @@
+# Synthesizer algorithms are forks of the PySynth algorithms hosted in https://mdoege.github.io/PySynth/.
+
 import wave
 import numpy as np
 from math import cos, pi, log, floor, ceil
