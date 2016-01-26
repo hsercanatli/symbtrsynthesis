@@ -1,5 +1,5 @@
 # adaptivetuning
-This repository hosts the implementations of an adaptive tuning method and a synthesizer for [SymbTr](https://github.com/MTG/SymbTr) scores.
+This repository hosts the implementations of an adaptive tuning method and a synthesizer for [SymbTr](https://github.com/MTG/SymbTr) scores in MusicXML format.
 
 The user can synthesize a SymbTr score in MusicXML format with the theoretical intervals or according to a tuning extracted from the performed pitches of a related recording.
 
