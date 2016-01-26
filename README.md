@@ -80,6 +80,10 @@ Then you can install the rest of the dependencies:
 
     pip install -r requirements
 
+Additional Code
+-------
+The synthesis algorihtms [synth_A_microtonal.py](https://github.com/hsercanatli/adaptivetuning/blob/master/adaptivetuning/synthesizer/synth_A_microtonal.py) and [synth_S_microtonal.py](https://github.com/hsercanatli/adaptivetuning/blob/master/adaptivetuning/synthesizer/synth_S_microtonal.py) are derived from [Martin C. Doege](mdoege@compuserve.com)'s synthesis tools hosted in [PySynth](https://github.com/mdoege/PySynth/). Please see the respective files for more detail.
+
 Authors
 -------
 Hasan Sercan Atlı	hsercanatli@gmail.com  
