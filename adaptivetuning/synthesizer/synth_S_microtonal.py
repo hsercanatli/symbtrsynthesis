@@ -1,4 +1,6 @@
-# Synthesizer algorithms are forks of the PySynth algorithms hosted in https://mdoege.github.io/PySynth/.
+# This algorithm is a modified version of algorithm hosted in
+# https://github.com/mdoege/PySynth/blob/master/pysynth_s.py written by Martin C. Doege
+# v1.1.2, commit 7a704e6 on Jul 22, 2012
 
 import wave
 import numpy as np

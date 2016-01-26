@@ -3,7 +3,7 @@ This repository hosts the implementations of an adaptive tuning method and a syn
 
 The user can synthesize a SymbTr score in MusicXML format with the theoretical intervals or according to a tuning extracted from the performed pitches of a related recording.
 
-Synthesizer algorithms are forks of the PySynth algorithms hosted in https://mdoege.github.io/PySynth/.
+The synthesizer algorithms are modified versions of the PySynth algorithms hosted in https://mdoege.github.io/PySynth/.
 
 This repository hosts the the implementation of the adaptive tuning/synthesis proposed in:
 

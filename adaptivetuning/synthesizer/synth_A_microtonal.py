@@ -1,4 +1,6 @@
-# Synthesizer algorithms are forks of the PySynth algorithms hosted in https://mdoege.github.io/PySynth/.
+# This algorithm is a modified version of algorithm hosted in
+# https://github.com/mdoege/PySynth/blob/master/pysynth.py written by Martin C. Doege
+# v1.1.2, commit 57a58d5 on Jul 21, 2012
 
 import wave
 import math
