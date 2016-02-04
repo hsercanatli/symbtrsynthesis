@@ -36,11 +36,11 @@ from adaptivetuning.synthesizer.synth_symbtr import synth_symbtr
 pitch = json.load(open("sampledata/huseyni--sazsemaisi--aksaksemai----tatyos_efendi/8b8d697b-cad9-446e-ad19-5e85a36aa253.json", 'r'))['pitch']
 
 # Post process the pitch track to get rid of spurious pitch estimations and correct octave errors
-flt = PitchPostFilter()
+flt = PitchPostFilter()  # The package is hosted in https://github.com/hsercanatli/pitch-post-filter
 pitch = flt.run(pitch)
 
 # identify the tonic for the related recording of SymbTr
-tnc = TonicLastNote()
+tnc = TonicLastNote()  # The package is hosted in https://github.com/hsercanatli/tonicidentifier_makam
 tonic, pitch, pitch_chunks, pitch_distribution, stable_pitches = tnc.identify(pitch)
 
 # Adapt the tuning and synthesizing the SymbTr
