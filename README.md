@@ -68,7 +68,7 @@ If you want to be able to edit files and have the changes be reflected, then ins
     pip install -e .
 
 The tonic identifier algorithm uses some modules in Essentia. 
-Follow the [instructions](essentia.upf.edu/documentation/installing.html) to install the library, otherwise, there would be an error for identification of the tonic from the extracted pitch.
+Follow the [instructions](http://essentia.upf.edu/documentation/installing.html) to install the library, otherwise, there would be an error for identification of the tonic from the extracted pitch.
 You can synthesize the SymbTr scores with theoretical intervals without installing Essentia.
 Then you should link the python bindings of Essentia in the virtual environment:
 
