@@ -1,16 +1,28 @@
+import os
+
 from ..synthesizer import synth_karplus, synth_sine
 from ..musicxml_reader import read_music_xml
 from ..musicxml_reader import interval_dict
 
-from ahenkidentifier.ahenkidentifier import AhenkIdentifier
 from morty.converter import Converter
+from predominantmelodymakam.predominantmelodymakam import \
+    PredominantMelodyMakam
+from pitchfilter.pitchfilter import PitchFilter
+from tonicidentifier.toniclastnote import TonicLastNote
+from morty.pitchdistribution import PitchDistribution
+from notemodel.notemodel import NoteModel
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 __author__ = ['hsercanatli', 'sertansenturk']
 
 
 class Tuner:
-    ahenk_identifier = AhenkIdentifier()
+    melody_extractor = PredominantMelodyMakam()
+    pitch_filter = PitchFilter()
+    tonic_identifier = TonicLastNote()
+    note_modeler = NoteModel()
 
     def __init__(self):
         pass
@@ -22,17 +34,77 @@ class Tuner:
                 return key
 
     @staticmethod
-    def adapt_score_frequencies(musicxml_path, stable_notes,
-                                synth_type='karplus', out='', verbose=False):
+    def synthesize(musicxml_path, reference='', synth_type='karplus',
+                   out='', verbose=False):
+        if verbose:
+            logging.basicConfig(level=logging.INFO)
 
+        if not reference == 'AEU':
+            assert os.path.exists(reference), 'reference should either be ' \
+                                              'empty (AEU theory) or a wav ' \
+                                              'file.'
+        assert synth_type in ['sine', 'karplus'], 'synth_type! should ' \
+                                                  'be either "sine" or ' \
+                                                  '"karplus".'
+        # read music score
+        logging.info(u"Reading the MusicXML file: {}".format(musicxml_path))
+        score = read_music_xml(musicxml_path)
+
+        if reference == 'AEU':
+            logging.info("Synthesizing the score wrt AEU theory")
+            stablenotes = {}
+        else:
+            logging.info("Synthesizing the score wrt the recording: {}".format(
+                reference))
+
+            # extract predominant melody
+            logging.info("> Extracting the predominant melody")
+            pitch = Tuner.melody_extractor.extract(reference)['pitch']
+            pitch = Tuner.pitch_filter.run(pitch)
+
+            # identify tonic
+            logging.info("> Extracting the tonic")
+            tonic = Tuner.tonic_identifier.identify(pitch)[0]
+
+            # tuning analysis
+            logging.info("> Extracting the tuning")
+            pitch_distribution = PitchDistribution.from_hz_pitch(
+                pitch[:, 1], ref_freq=tonic['value'])
+            stablenotes = Tuner.note_modeler.calculate_notes(
+                pitch_distribution, tonic['value'], score['makam'],
+                min_peak_ratio=0.1)
+
+        if not out:
+            out = musicxml_path[:-4] + "--adapted_" + synth_type + ".wav"
+
+        # synthesize
+        Tuner.synth_from_tuning(score, stable_notes=stablenotes,
+                                synth_type='karplus', out=out,
+                                verbose=verbose)
+
+    @staticmethod
+    def synth_from_tuning(score, stable_notes=None,
+                          synth_type='karplus', out='out.wav', verbose=False):
         assert synth_type in ['sine', 'karplus'], 'Unknown synthesis type! ' \
                                                   'Choose "sine" or "karplus"'
 
         # read the MusicXML score
-        score = read_music_xml(musicxml_path)
         tonic_symbol = Tuner.get_tonic_sym(stable_notes)
 
-        # adapt the tuning
+        # if given, replace the note pitches wrt the tuning extracted from the
+        # audio reference
+        if stable_notes is not None:
+            logging.info("Replacing the pitches wrt the audio tuning")
+            Tuner.replace_tuning(score, stable_notes, tonic_symbol, verbose)
+
+        # synthesize
+        if synth_type == 'sine':
+            synth_sine(score, fn=out, verbose=verbose)
+        elif synth_type == 'karplus':
+            synth_karplus(score, fn=out, verbose=verbose)
+
+    @staticmethod
+    def replace_tuning(score, stable_notes, tonic_symbol, verbose):
         for note in score['notes']:
             note_sym = note[0]
 
@@ -41,23 +113,14 @@ class Tuner:
             except KeyError:
                 if note_sym == '__':  # rest
                     pass
-                else:
+                else:  # tuning not available for the note symbol
                     if verbose:
-                        print(u'No tuning estimation for the note {}. Falling '
-                              u'back to the theoretical (AEU) interval'.format(
-                            note_sym))
+                        logging.debug(u'No tuning estimation for the note {}. '
+                                      u'Falling back to the theoretical (AEU) '
+                                      u'interval'.format(note_sym))
                     theo_int = interval_dict[note_sym] - interval_dict[
                         tonic_symbol]
                     tonic_freq = stable_notes[tonic_symbol]['stable_pitch'][
                         'value']
 
                     note[2] = Converter.cent_to_hz(theo_int, tonic_freq)
-
-        if not out:
-            out = musicxml_path[:-4] + "--adapted_" + synth_type + ".wav"
-
-        # synthesize
-        if synth_type == 'sine':
-            synth_sine(score, fn=out, verbose=verbose)
-        elif synth_type == 'karplus':
-            synth_karplus(score, fn=out, verbose=verbose)
