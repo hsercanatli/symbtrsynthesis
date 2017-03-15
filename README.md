@@ -12,44 +12,17 @@ If you are using this code, please cite the above paper.
 Synthesizing a score with theoretical intervals
 =======
 ```python
-from adaptivetuning.synthesizer.synth_symbtr import synth_symbtr
+from adaptivetuning.tuner.tuner import Tuner
 
-synth_symbtr(musicxml_path="sampledata/saba--ornek_oz--sofyan--2--ruhi_ayangil/saba--ornek_oz--sofyan--2--ruhi_ayangil.xml",
-             out='out.wav', type='karplus', verbose=False)
-
-synth_symbtr(musicxml_path="sampledata/saba--ornek_oz--sofyan--2--ruhi_ayangil/saba--ornek_oz--sofyan--2--ruhi_ayangil.xml",
-             out='out.wav', type='sine', verbose=True, out='out.wav')
+Tuner.synthesize(score_file, synth_type='karplus', verbose=False)
 ```
 
 Synthesizing a score according to a performance
 =======
 ```python
-import json
-
-from pitchfilter.pitchfilter import PitchPostFilter
-from tonicidentifier.tonicidentifier import TonicLastNote
 from adaptivetuning.tuner.tuner import Tuner
-from adaptivetuning.synthesizer.synth_symbtr import synth_symbtr
 
-# load extracted pitch of a related recording of the selected SymbTr for adaptive tuning
-# You can use predominantmelodymakam (https://github.com/sertansenturk/predominantmelodymakam) to compute the pitch track
-pitch = json.load(open("sampledata/huseyni--sazsemaisi--aksaksemai----tatyos_efendi/8b8d697b-cad9-446e-ad19-5e85a36aa253.json", 'r'))['pitch']
-
-# Post process the pitch track to get rid of spurious pitch estimations and correct octave errors
-flt = PitchPostFilter()  # The package is hosted in https://github.com/hsercanatli/pitch-post-filter
-pitch = flt.run(pitch)
-
-# identify the tonic for the related recording of SymbTr
-tnc = TonicLastNote()  # The package is hosted in https://github.com/hsercanatli/tonicidentifier_makam
-tonic, pitch, pitch_chunks, pitch_distribution, stable_pitches = tnc.identify(pitch)
-
-# Adapt the tuning and synthesizing the SymbTr
-tuner = Tuner()
-theoretical_histogram, adapted_histogram = tuner.adapt_score_frequencies(musicxml_path="sampledata/huseyni--sazsemaisi--aksaksemai----tatyos_efendi/huseyni--sazsemaisi--aksaksemai----tatyos_efendi.xml",
-                                                                         performed_tonic=tonic['value'],
-                                                                         stable_pitches=stable_pitches,
-                                                                         type='karplus',
-                                                                         verbose=False)
+Tuner.synthesize(score_file, reference=audio_file, synth_type='karplus', verbose=False)                                                   verbose=False)
 ```
 
 Please refer to demo.ipynb for an interactive demo.
