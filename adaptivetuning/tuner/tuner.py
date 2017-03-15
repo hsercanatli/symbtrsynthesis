@@ -48,7 +48,9 @@ class Tuner:
                 break
         return theoretical_tonic
 
-    def adapt_score_frequencies(self, musicxml_path, performed_tonic, stable_pitches, type='sine', out='', verbose=False):
+    def adapt_score_frequencies(self, musicxml_path, performed_tonic,
+                                stable_pitches, type='sine', out='',
+                                verbose=False):
         score = read_music_xml(musicxml_path)
 
         adapted_histogram = {}
