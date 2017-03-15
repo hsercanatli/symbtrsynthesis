@@ -2,10 +2,11 @@
 
 from setuptools import setup
 
-setup(name='makamadaptivetuning',
-      version='0.1',
-      description='A Synthesizer and an adaptive tuner for SymbTr files',
+setup(name='adaptivetuning',
+      version='1.0.0-dev',
+      description='A Synthesizer and an adaptive tuner for SymbTr-MusicXML scores',
       author='Hasan Sercan Atli',
       url='https://github.com/hsercanatli/adaptive-tuning',
-      packages=['adaptivetuning']
+      packages=['adaptivetuning'],
+      include_package_data=True,
       )
