@@ -1,1 +1,7 @@
 numpy
+
+git+https://github.com/sertansenturk/predominantmelodymakam.git@v1.2.1#egg=predominantmelodymakam
+git+https://github.com/hsercanatli/pitchfilter.git@v1.2.1#egg=pitchfilter
+git+https://github.com/hsercanatli/tonicidentifier_makam@v1.3.1#egg=tonicidentifier_makam
+git+https://github.com/altugkarakurt/morty.git@v1.2.1#egg=morty
+git+https://github.com/miracatici/notemodel.git@v1.2.1#egg=notemodel
