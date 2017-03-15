@@ -1,14 +1,17 @@
-# This algorithm is a modified version of the algorithm hosted in
-# https://github.com/mdoege/PySynth/blob/master/pysynth_s.py written by Martin C. Doege
-# v1.1.2, commit 7a704e6 on Jul 22, 2012. The original code is licenced under the GPL.
+# This algorithm is a modified version of the algorithm originally written
+# by Martin C. Doege
+# The algorihm is hosted at:
+# https://github.com/mdoege/PySynth/blob/master/pysynth_s.py
+# We adapted the code from v1.1.2, commit 7a704e6 on Jul 22, 2012.
+# The original code is licenced under the GPL.
 
 import wave
 import numpy as np
 from math import cos, pi, log, floor, ceil
 
 
-def make_wav(inp, transpose=0, pause=0.,
-             repeat=0, fn="out.wav", silent=False, verbose=False):
+def make_wav(score, transpose=0, pause=0.0, repeat=0, fn="out.wav",
+             silent=False, verbose=False):
 
     # wave settings
     f = wave.open(fn, 'w')
@@ -18,7 +21,7 @@ def make_wav(inp, transpose=0, pause=0.,
     f.setframerate(44100)
     f.setcomptype('NONE', 'Not Compressed')
 
-    bpm_fac = 120. / inp['bpm']
+    bpm_fac = 120. / score['bpm']
 
     def length(l):
         return 88200. / l * bpm_fac
@@ -60,13 +63,12 @@ def make_wav(inp, transpose=0, pause=0.,
             v2 = ifac2 * kps2[t - hi + 1] + (1. - ifac2) * kps2[t - li + 1]
             kps2[t] += .5 * (v1 + v2) * falloff
 
-        # print len(data[pos:pos+snd_len]), snd_len, len(kps2[0:snd_len]), pos,'/',len(data)
         data[pos:pos + snd_len] += kps2[0:snd_len] * vol * volfac
 
     ex_pos = 0.
     t_len = 0
-    for x in inp['notes']:
-        # ornomentations are ignored
+    for x in score['notes']:
+        # ornamentations are ignored
         if int(x[3]) != 0 and int(x[4]) != 0:
             if int(x[4]) * int(x[3]) < 0:
                 t_len += length(-2. * (float(x[4]) * float(x[3])) / 3.)
@@ -76,10 +78,9 @@ def make_wav(inp, transpose=0, pause=0.,
     data = np.zeros((repeat + 1) * t_len + 20. * 44100.)
 
     for rp in range(repeat + 1):
-        #print inp['notes']
-        for nn, x in enumerate(inp['notes']):
-            if verbose:
-                if not nn % 10 and silent == False: print "[%u/%u]\t" % (nn + 1, len(inp['notes']))
+        for nn, x in enumerate(score['notes']):
+            if verbose and not nn % 10 and silent == False:
+                print("[%u/%u]\t" % (nn + 1, len(score['notes'])))
 
             # and int(x[4]) != 0 and int(x[5]) != 0:
             if x[0] != '__' and int(x[3]) != 0 and int(x[4]) != 0:
@@ -101,9 +102,8 @@ def make_wav(inp, transpose=0, pause=0.,
                 b = length(float(x[4]) / float(x[3]))
                 ex_pos += b
 
-    if not silent:
-        if verbose:
-            print "Writing to file", fn
+    if not silent and verbose:
+            print("Writing to file", fn)
 
     data /= data.max() * 2.
     out_len = int(2. * 44100. + ex_pos + .5)

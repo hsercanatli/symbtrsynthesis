@@ -2,20 +2,29 @@
 
 from xml.etree.ElementTree import parse
 from fractions import Fraction
+from morty.converter import Converter
+import os
+import json
 
 # accidentals dictionary
-accidental_dict = {'quarter-flat': -1, 'slash-flat': -4, 'flat': -5, 'double-slash-flat': -8,
-                   'slash-quarter-sharp': +1, 'sharp': +4, '': +5, 'slash-sharp': +8}
+accidental_dict = {'quarter-flat': -1, 'slash-flat': -4, 'flat': -5,
+                   'double-slash-flat': -8, 'slash-quarter-sharp': +1,
+                   'sharp': +4, '': +5, 'slash-sharp': +8}
 
-# frequency dictionary
-freq_dict = {'__': 0, 'G3': 196, 'A3': 220, 'B3': 247, 'C4': 262, 'D4': 294, 'E4': 330,
-             'F4': 349, 'G4': 392, 'A4': 440, 'B4': 493, 'C5': 523, 'D5': 587,
-             'E5': 659, 'F5': 698, 'G5': 783, 'A5': 880, 'B5': 988, 'C6': 1046,
-             'D6': 1174, 'E6': 1318, 'F6': 1396, 'G6': 1566, 'B6': 1976, 'C7': 2092}
+# load the interval dictionary
+interval_dict = json.load(open(os.path.join(os.path.dirname(
+    os.path.abspath(__file__)), 'data', 'note_intervals_C0.json')))
+
+# convert to bolahenk frequency from intervals
+freq_dict = {}
+for key, val in interval_dict.items():
+    freq_dict[key] = Converter.cent_to_hz(val - 500.0, 16.35)
+freq_dict['__'] = 0  # add rest
 
 # types dictionary
-note_type_dict = {'whole': [2 ** 2, 1], 'half': [2 ** 1, 2], 'quarter': [2 ** 0, 4],
-                  'eighth': [2 ** -1, 8], '16th': [2 ** -2, 16], '32nd': [2 ** -3, 32],
+note_type_dict = {'whole': [2 ** 2, 1], 'half': [2 ** 1, 2],
+                  'quarter': [2 ** 0, 4], 'eighth': [2 ** -1, 8],
+                  '16th': [2 ** -2, 16], '32nd': [2 ** -3, 32],
                   '64th': [2 ** -4, 64]}
 
 
@@ -46,11 +55,13 @@ def read_music_xml(fname):
                 step = '_'
                 octave = '_'
 
-            # accidentals information
+            # accidental information
             try:
                 acc = note.find('accidental').text
-                if type(acc) is type(None): acc = 0
-                else: acc = accidental_dict["{0}".format(acc)]
+                if acc is None:
+                    acc = 0
+                else:
+                    acc = accidental_dict["{0}".format(acc)]
             except:
                 acc = 0
 
@@ -64,11 +75,16 @@ def read_music_xml(fname):
                 try:
                     if type(note.find('dot').text):
                         pay_payda = max(
-                            ((44100. * 60 * note_ratio / bpm) / (int(q_note_len * float(dur) / divs) * 1e-3 * 44100.)),
-                            ((int(q_note_len * float(dur) / divs) * 1e-3 * 44100.) /
+                            ((44100. * 60 * note_ratio / bpm) /
+                             (int(q_note_len * float(dur) / divs) * 1e-3 *
+                              44100.)),
+                            ((int(q_note_len * float(dur) / divs) * 1e-3 *
+                              44100.) /
                              (44100. * 60 / bpm * note_ratio))) / note_payda
-                        numerator = int(Fraction(pay_payda).limit_denominator(100).numerator)
-                        denominator = int(Fraction(pay_payda).limit_denominator(100).denominator)
+                        numerator = int(Fraction(
+                            pay_payda).limit_denominator(100).numerator)
+                        denominator = int(Fraction(
+                            pay_payda).limit_denominator(100).denominator)
 
                 except:
                     numerator = 1
@@ -78,15 +94,18 @@ def read_music_xml(fname):
                 pass
 
         except:
-            print "ornamentation is ignored"
+            print("ornamentation is ignored")
+
+        note_sym = get_symbtr_note_sym(step, octave, acc)
 
         # freq calculations
-        freq = freq_dict['{0}'.format(step + octave)]
-        if acc != 0: freq *= 2 ** (acc / 53.0)
+        freq = freq_dict['{0}{1}'.format(step, octave)]
+        if acc != 0:
+            freq *= 2 ** (acc / 53.0)
 
-        temp_note.append(step + octave)
+        temp_note.append(note_sym)
         temp_note.append(acc)
-        temp_note.append(int(freq))
+        temp_note.append(freq)
         temp_note.append(numerator)
         temp_note.append(denominator)
         temp_note.append(int(q_note_len * float(dur) * 1e-3 * 44100 / divs))
@@ -95,3 +114,15 @@ def read_music_xml(fname):
         count += 1
     return {'notes': notes,
             'bpm': bpm}
+
+
+def get_symbtr_note_sym(step, octave, acc):
+    if acc == 0:  # natural
+        acc_str = ''
+    elif acc < 0:  # flat
+        acc_str = 'b' + str(abs(acc))
+    else:  # sharp
+        acc_str = '#' + str(acc)
+    note_sym = step + octave + acc_str
+
+    return note_sym

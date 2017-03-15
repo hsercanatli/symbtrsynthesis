@@ -1,6 +1,9 @@
-# This algorithm is a modified version of the algorithm hosted in
-# https://github.com/mdoege/PySynth/blob/master/pysynth.py written by Martin C. Doege
-# v1.1.2, commit 57a58d5 on Jul 21, 2012. The original code is licenced under the GPL.
+# This algorithm is a modified version of the algorithm originally written
+# by Martin C. Doege
+# The algorihm is hosted at:
+# https://github.com/mdoege/PySynth/blob/master/pysynth_s.py
+# We adapted the code from v1.1.2, commit 7a704e6 on Jul 22, 2012.
+# The original code is licenced under the GPL.
 
 import wave
 import math
@@ -9,7 +12,9 @@ import struct
 harm_max = 4.
 
 
-def make_wav(data, transpose=0, pause=.05, repeat=0, fn="out.wav", silent=False, verbose=False):
+def make_wav(score, transpose=0, pause=.05, repeat=0, fn="out.wav",
+             silent=False, verbose=False):
+
     # wave settings
     f = wave.open(fn, 'w')
 
@@ -18,7 +23,7 @@ def make_wav(data, transpose=0, pause=.05, repeat=0, fn="out.wav", silent=False,
     f.setframerate(44100)
     f.setcomptype('NONE', 'Not Compressed')
 
-    bpm_fac = 120. / data['bpm']
+    bpm_fac = 120. / score['bpm']
 
     def length(l):
         return 88200. / l * bpm_fac
@@ -60,20 +65,20 @@ def make_wav(data, transpose=0, pause=.05, repeat=0, fn="out.wav", silent=False,
             dfac = 1. - s + s * decay
             ow += sixteen_bit((asin(float(x) / l[0])
                               + harm * asin(float(x) / (l[0] / 2.))
-                              + .5 * harm * asin(float(x) / (l[0] / 4.))) / 4. * fac * vol * dfac * vol_fac)
+                              + .5 * harm * asin(float(x) / (l[0] / 4.)))
+                              / 4. * fac * vol * dfac * vol_fac)
         fill = max(int(ex_pos - curpos - q), 0)
         f.writeframesraw(ow + (sixteen_bit(0) * fill))
         return q + fill
 
-    if not silent:
-        if verbose:
-            print "Writing to file", fn
+    if not silent and verbose:
+            print("Writing to file", fn)
     curpos = 0
     ex_pos = 0.
     for rp in range(repeat + 1):
-        for nn, x in enumerate(data['notes']):
-            if verbose:
-                if nn % 10 == 0: print "[{0}/{1}]".format(nn+1, len(data["notes"]))
+        for nn, x in enumerate(score['notes']):
+            if verbose and nn % 10 == 0:
+                print("[{0}/{1}]".format(nn + 1, len(score["notes"])))
             if x[0] != '__' and int(x[3]) != 0 and int(x[4]) != 0:
 
                 vol = 1.  # volume
