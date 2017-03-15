@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.WARNING)
 __author__ = ['hsercanatli', 'sertansenturk']
 
 
-class Tuner:
+class AdaptiveSynthesizer:
     melody_extractor = PredominantMelodyMakam()
     pitch_filter = PitchFilter()
     tonic_identifier = TonicLastNote()
@@ -59,18 +59,18 @@ class Tuner:
 
             # extract predominant melody
             logging.info("... Extracting the predominant melody")
-            pitch = Tuner.melody_extractor.extract(reference)['pitch']
-            pitch = Tuner.pitch_filter.run(pitch)
+            pitch = AdaptiveSynthesizer.melody_extractor.extract(reference)['pitch']
+            pitch = AdaptiveSynthesizer.pitch_filter.run(pitch)
 
             # identify tonic
             logging.info("... Extracting the tonic")
-            tonic = Tuner.tonic_identifier.identify(pitch)[0]
+            tonic = AdaptiveSynthesizer.tonic_identifier.identify(pitch)[0]
 
             # tuning analysis
             logging.info("... Extracting the tuning")
             pitch_distribution = PitchDistribution.from_hz_pitch(
                 pitch[:, 1], ref_freq=tonic['value'])
-            stablenotes = Tuner.note_modeler.calculate_notes(
+            stablenotes = AdaptiveSynthesizer.note_modeler.calculate_notes(
                 pitch_distribution, tonic['value'], score['makam'],
                 min_peak_ratio=0.1)
 
@@ -78,9 +78,9 @@ class Tuner:
             out = musicxml_path[:-4] + "--adapted_" + synth_type + ".wav"
 
         # synthesize
-        Tuner.synth_from_tuning(score, stable_notes=stablenotes,
-                                synth_type='karplus', out=out,
-                                verbose=verbose)
+        AdaptiveSynthesizer.synth_from_tuning(score, stable_notes=stablenotes,
+                                              synth_type='karplus', out=out,
+                                              verbose=verbose)
 
     @staticmethod
     def synth_from_tuning(score, stable_notes=None,
@@ -89,13 +89,13 @@ class Tuner:
                                                   'Choose "sine" or "karplus"'
 
         # read the MusicXML score
-        tonic_symbol = Tuner.get_tonic_sym(stable_notes)
+        tonic_symbol = AdaptiveSynthesizer.get_tonic_sym(stable_notes)
 
         # if given, replace the note pitches wrt the tuning extracted from the
         # audio reference
         if stable_notes is not None:
             logging.info("Replacing the pitches wrt the audio tuning")
-            Tuner._replace_tuning(score, stable_notes, tonic_symbol, verbose)
+            AdaptiveSynthesizer._replace_tuning(score, stable_notes, tonic_symbol, verbose)
 
         # synthesize
         if synth_type == 'sine':
