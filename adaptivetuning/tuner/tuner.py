@@ -16,10 +16,10 @@ class Tuner:
         pass
 
     @staticmethod
-    def compute_score_tonic(score):
-        for note in reversed(score['notes']):
-            if not note[0] == '__':
-                return note[0]
+    def get_tonic_sym(stable_notes):
+        for key, val in stable_notes.items():
+            if val['theoretical_interval']['value'] == 0:
+                return key
 
     @staticmethod
     def adapt_score_frequencies(musicxml_path, stable_notes,
@@ -30,7 +30,7 @@ class Tuner:
 
         # read the MusicXML score
         score = read_music_xml(musicxml_path)
-        tonic_symbol = Tuner.compute_score_tonic(score)
+        tonic_symbol = Tuner.get_tonic_sym(stable_notes)
 
         # adapt the tuning
         for note in score['notes']:
@@ -55,9 +55,6 @@ class Tuner:
 
         if not out:
             out = musicxml_path[:-4] + "--adapted_" + synth_type + ".wav"
-
-        import pdb
-        pdb.set_trace()
 
         # synthesize
         if synth_type == 'sine':
