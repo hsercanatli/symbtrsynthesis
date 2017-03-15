@@ -5,27 +5,32 @@ from fractions import Fraction
 from morty.converter import Converter
 import os
 import json
+import warnings
 
 # accidentals dictionary
-accidental_dict = {'quarter-flat': -1, 'slash-flat': -4, 'flat': -5,
-                   'double-slash-flat': -8, 'slash-quarter-sharp': +1,
-                   'sharp': +4, '': +5, 'slash-sharp': +8}
+_accidental_dict = {'quarter-flat': -1, 'slash-flat': -4, 'flat': -5,
+                    'double-slash-flat': -8, 'slash-quarter-sharp': +1,
+                    'sharp': +4, '': +5, 'slash-sharp': +8}
 
 # load the interval dictionary
-interval_dict = json.load(open(os.path.join(os.path.dirname(
+_interval_dict = json.load(open(os.path.join(os.path.dirname(
     os.path.abspath(__file__)), 'data', 'note_intervals_C0.json')))
 
 # convert to bolahenk frequency from intervals
-freq_dict = {}
-for key, val in interval_dict.items():
-    freq_dict[key] = Converter.cent_to_hz(val - 500.0, 16.35)
-freq_dict['__'] = 0  # add rest
+_freq_dict = {}
+for key, val in _interval_dict.items():
+    _freq_dict[key] = Converter.cent_to_hz(val - 500.0, 16.35)
+_freq_dict['__'] = 0  # add rest
 
 # types dictionary
-note_type_dict = {'whole': [2 ** 2, 1], 'half': [2 ** 1, 2],
-                  'quarter': [2 ** 0, 4], 'eighth': [2 ** -1, 8],
-                  '16th': [2 ** -2, 16], '32nd': [2 ** -3, 32],
-                  '64th': [2 ** -4, 64]}
+_note_type_dict = {'whole': [2 ** 2, 1], 'half': [2 ** 1, 2],
+                   'quarter': [2 ** 0, 4], 'eighth': [2 ** -1, 8],
+                   '16th': [2 ** -2, 16], '32nd': [2 ** -3, 32],
+                   '64th': [2 ** -4, 64]}
+
+# makam dictionary
+_makam_dict = json.load(open(os.path.join(os.path.dirname(
+    os.path.abspath(__file__)), 'data', 'makam.json')))
 
 
 def read_music_xml(fname):
@@ -38,6 +43,8 @@ def read_music_xml(fname):
     bpm = float(root.find('part/measure/direction/sound').attrib['tempo'])
     divs = float(root.find('part/measure/attributes/divisions').text)
     q_note_len = 60000. / bpm
+
+    makam = _get_makam(root)
 
     count = 1
     for note in root.findall('part/measure/note'):
@@ -61,15 +68,15 @@ def read_music_xml(fname):
                 if acc is None:
                     acc = 0
                 else:
-                    acc = accidental_dict["{0}".format(acc)]
+                    acc = _accidental_dict["{0}".format(acc)]
             except:
                 acc = 0
 
             # type of note
             try:
                 note_type = note.find('type').text
-                note_ratio = note_type_dict['{0}'.format(note_type)][0]
-                note_payda = note_type_dict['{0}'.format(note_type)][1]
+                note_ratio = _note_type_dict['{0}'.format(note_type)][0]
+                note_payda = _note_type_dict['{0}'.format(note_type)][1]
 
                 # dotted notes
                 try:
@@ -88,7 +95,7 @@ def read_music_xml(fname):
 
                 except:
                     numerator = 1
-                    denominator = note_type_dict['{0}'.format(note_type)][1]
+                    denominator = _note_type_dict['{0}'.format(note_type)][1]
 
             except:
                 pass
@@ -96,10 +103,10 @@ def read_music_xml(fname):
         except:
             print("ornamentation is ignored")
 
-        note_sym = get_symbtr_note_sym(step, octave, acc)
+        note_sym = _get_symbtr_note_sym(step, octave, acc)
 
         # freq calculations
-        freq = freq_dict['{0}{1}'.format(step, octave)]
+        freq = _freq_dict['{0}{1}'.format(step, octave)]
         if acc != 0:
             freq *= 2 ** (acc / 53.0)
 
@@ -112,11 +119,29 @@ def read_music_xml(fname):
 
         notes.append(temp_note)
         count += 1
-    return {'notes': notes,
-            'bpm': bpm}
+    return {'notes': notes, 'bpm': bpm, 'makam': makam}
 
 
-def get_symbtr_note_sym(step, octave, acc):
+def _get_makam(root):
+    if root.find('part/measure/direction/direction-type/words').text:
+        # the information is stored in the form below:
+        # "Makam: [makam], Form: [form], Usul: [usul] "
+        cultural_info = root.find(
+            'part/measure/direction/direction-type/words').text
+
+        attributes = []
+        for info in cultural_info.split(","):
+            attributes.append(''.join(info.split(": ")[1]).strip())
+
+        makam, form, usul = attributes
+    else:
+        warnings.warn("Makam information does not exist.")
+        makam = ''
+
+    return _get_makam_slug(makam)
+
+
+def _get_symbtr_note_sym(step, octave, acc):
     if acc == 0:  # natural
         acc_str = ''
     elif acc < 0:  # flat
@@ -126,3 +151,9 @@ def get_symbtr_note_sym(step, octave, acc):
     note_sym = step + octave + acc_str
 
     return note_sym
+
+
+def _get_makam_slug(makam_mu2_name):
+    for makam_slug, makam_val in _makam_dict.items():
+        if makam_val['mu2_name'] == makam_mu2_name:
+            return makam_slug

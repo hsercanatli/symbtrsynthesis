@@ -2,7 +2,7 @@ import os
 
 from ..synthesizer import synth_karplus, synth_sine
 from ..musicxml_reader import read_music_xml
-from ..musicxml_reader import interval_dict
+from ..musicxml_reader import _interval_dict
 
 from morty.converter import Converter
 from predominantmelodymakam.predominantmelodymakam import \
@@ -13,7 +13,7 @@ from morty.pitchdistribution import PitchDistribution
 from notemodel.notemodel import NoteModel
 
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.WARNING)
 
 __author__ = ['hsercanatli', 'sertansenturk']
 
@@ -37,9 +37,9 @@ class Tuner:
     def synthesize(musicxml_path, reference='', synth_type='karplus',
                    out='', verbose=False):
         if verbose:
-            logging.basicConfig(level=logging.INFO)
+            logging.basicConfig(level=logging.DEBUG)
 
-        if not reference == 'AEU':
+        if not reference == '':
             assert os.path.exists(reference), 'reference should either be ' \
                                               'empty (AEU theory) or a wav ' \
                                               'file.'
@@ -50,24 +50,24 @@ class Tuner:
         logging.info(u"Reading the MusicXML file: {}".format(musicxml_path))
         score = read_music_xml(musicxml_path)
 
-        if reference == 'AEU':
+        if reference == '':
             logging.info("Synthesizing the score wrt AEU theory")
-            stablenotes = {}
+            stablenotes = None
         else:
             logging.info("Synthesizing the score wrt the recording: {}".format(
                 reference))
 
             # extract predominant melody
-            logging.info("> Extracting the predominant melody")
+            logging.info("... Extracting the predominant melody")
             pitch = Tuner.melody_extractor.extract(reference)['pitch']
             pitch = Tuner.pitch_filter.run(pitch)
 
             # identify tonic
-            logging.info("> Extracting the tonic")
+            logging.info("... Extracting the tonic")
             tonic = Tuner.tonic_identifier.identify(pitch)[0]
 
             # tuning analysis
-            logging.info("> Extracting the tuning")
+            logging.info("... Extracting the tuning")
             pitch_distribution = PitchDistribution.from_hz_pitch(
                 pitch[:, 1], ref_freq=tonic['value'])
             stablenotes = Tuner.note_modeler.calculate_notes(
@@ -95,7 +95,7 @@ class Tuner:
         # audio reference
         if stable_notes is not None:
             logging.info("Replacing the pitches wrt the audio tuning")
-            Tuner.replace_tuning(score, stable_notes, tonic_symbol, verbose)
+            Tuner._replace_tuning(score, stable_notes, tonic_symbol, verbose)
 
         # synthesize
         if synth_type == 'sine':
@@ -104,7 +104,7 @@ class Tuner:
             synth_karplus(score, fn=out, verbose=verbose)
 
     @staticmethod
-    def replace_tuning(score, stable_notes, tonic_symbol, verbose):
+    def _replace_tuning(score, stable_notes, tonic_symbol, verbose):
         for note in score['notes']:
             note_sym = note[0]
 
@@ -118,7 +118,7 @@ class Tuner:
                         logging.debug(u'No tuning estimation for the note {}. '
                                       u'Falling back to the theoretical (AEU) '
                                       u'interval'.format(note_sym))
-                    theo_int = interval_dict[note_sym] - interval_dict[
+                    theo_int = _interval_dict[note_sym] - _interval_dict[
                         tonic_symbol]
                     tonic_freq = stable_notes[tonic_symbol]['stable_pitch'][
                         'value']
