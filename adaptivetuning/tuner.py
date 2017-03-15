@@ -1,8 +1,8 @@
 import os
 
-from ..synthesizer import synth_karplus, synth_sine
-from ..musicxml_reader import read_music_xml
-from ..musicxml_reader import _interval_dict
+from . synthesizer import synth_karplus, synth_sine
+from . musicxml_reader import read_music_xml
+from . musicxml_reader import interval_dict
 
 from morty.converter import Converter
 from predominantmelodymakam.predominantmelodymakam import \
@@ -118,7 +118,7 @@ class Tuner:
                         logging.debug(u'No tuning estimation for the note {}. '
                                       u'Falling back to the theoretical (AEU) '
                                       u'interval'.format(note_sym))
-                    theo_int = _interval_dict[note_sym] - _interval_dict[
+                    theo_int = interval_dict[note_sym] - interval_dict[
                         tonic_symbol]
                     tonic_freq = stable_notes[tonic_symbol]['stable_pitch'][
                         'value']

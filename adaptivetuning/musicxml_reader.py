@@ -13,12 +13,12 @@ _accidental_dict = {'quarter-flat': -1, 'slash-flat': -4, 'flat': -5,
                     'sharp': +4, '': +5, 'slash-sharp': +8}
 
 # load the interval dictionary
-_interval_dict = json.load(open(os.path.join(os.path.dirname(
+interval_dict = json.load(open(os.path.join(os.path.dirname(
     os.path.abspath(__file__)), 'data', 'note_intervals_C0.json')))
 
 # convert to bolahenk frequency from intervals
 _freq_dict = {}
-for key, val in _interval_dict.items():
+for key, val in interval_dict.items():
     _freq_dict[key] = Converter.cent_to_hz(val - 500.0, 16.35)
 _freq_dict['__'] = 0  # add rest
 
