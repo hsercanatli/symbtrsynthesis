@@ -30,12 +30,6 @@ class AdaptiveSynthesizer:
         pass
 
     @staticmethod
-    def get_tonic_sym(stable_notes):
-        for key, val in stable_notes.items():
-            if val['theoretical_interval']['value'] == 0:
-                return key
-
-    @staticmethod
     def synthesize(musicxml_path, ref_rec='', synth_type='karplus',
                    out='', verbose=False):
         if verbose:
@@ -94,15 +88,11 @@ class AdaptiveSynthesizer:
         assert synth_type in ['sine', 'karplus'], 'Unknown synthesis type! ' \
                                                   'Choose "sine" or "karplus"'
 
-        # read the MusicXML score
-        tonic_symbol = AdaptiveSynthesizer.get_tonic_sym(stable_notes)
-
         # if given, replace the note pitches wrt the tuning extracted from the
         # audio reference
         if stable_notes is not None:
             logging.info("Replacing the pitches wrt the audio tuning")
-            AdaptiveSynthesizer._replace_tuning(score, stable_notes,
-                                                tonic_symbol, verbose)
+            AdaptiveSynthesizer._replace_tuning(score, stable_notes, verbose)
 
         # synthesize
         if synth_type == 'sine':
@@ -111,7 +101,7 @@ class AdaptiveSynthesizer:
             synth_karplus(score, fn=out, verbose=verbose)
 
     @staticmethod
-    def _replace_tuning(score, stable_notes, tonic_symbol, verbose):
+    def _replace_tuning(score, stable_notes, verbose):
         for note in score['notes']:
             note_sym = note[0]
 
@@ -126,8 +116,8 @@ class AdaptiveSynthesizer:
                                       u'Falling back to the theoretical (AEU) '
                                       u'interval'.format(note_sym))
                     theo_int = interval_dict[note_sym] - interval_dict[
-                        tonic_symbol]
-                    tonic_freq = stable_notes[tonic_symbol]['stable_pitch'][
+                        score['tonic']]
+                    tonic_freq = stable_notes[score['tonic']]['stable_pitch'][
                         'value']
 
                     note[2] = Converter.cent_to_hz(theo_int, tonic_freq)

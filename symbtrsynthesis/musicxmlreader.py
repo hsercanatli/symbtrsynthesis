@@ -119,7 +119,9 @@ def read_music_xml(fname):
 
         notes.append(temp_note)
         count += 1
-    return {'notes': notes, 'bpm': bpm, 'makam': makam}
+
+    tonic_sym = _get_tonic_sym(notes)
+    return {'notes': notes, 'bpm': bpm, 'makam': makam, 'tonic': tonic_sym}
 
 
 def _get_makam(root):
@@ -157,3 +159,8 @@ def _get_makam_slug(makam_mu2_name):
     for makam_slug, makam_val in _makam_dict.items():
         if makam_val['mu2_name'] == makam_mu2_name:
             return makam_slug
+
+def _get_tonic_sym(notes):
+    for i in range(1, len(notes)):
+        if notes[-i][0] != '__':
+            return notes[-i][2]
