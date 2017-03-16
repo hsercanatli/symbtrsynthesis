@@ -2,11 +2,11 @@
 
 from setuptools import setup
 
-setup(name='adaptivetuning',
+setup(name='symbtrsynthesis',
       version='1.0.0-dev',
-      description='A Synthesizer and an adaptive tuner for SymbTr-MusicXML scores',
+      description='An (adaptive) synthesizer for SymbTr-MusicXML scores',
       author='Hasan Sercan Atli',
       url='https://github.com/hsercanatli/adaptive-tuning',
-      packages=['adaptivetuning'],
+      packages=['symbtrsynthesis'],
       include_package_data=True,
       )
