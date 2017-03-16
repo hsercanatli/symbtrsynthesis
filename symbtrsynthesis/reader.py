@@ -6,6 +6,7 @@ import json
 import xml.etree.ElementTree as eT
 from xml.etree.ElementTree import ParseError
 from fractions import Fraction
+import numpy as np
 
 from morty.converter import Converter
 
@@ -70,10 +71,13 @@ class MusicXMLReader(object):
         composer, lyricist = cls._get_composer_lyricist(root)
 
         # reading the xml measure by measure
-        measures, time_sigs, bpm = cls._get_measures(root)
+        measures, time_sigs, bpm = cls._get_measures(root, keysig)
+
+        # symbolic tonic
+        tnc_sym = cls._get_tonic_sym(measures)
 
         return (measures, makam, usul, form, time_sigs, keysig,
-                work_title, composer, lyricist, bpm)
+                work_title, composer, lyricist, bpm, tnc_sym)
 
     @staticmethod
     def _get_key_signature(root):
@@ -126,7 +130,7 @@ class MusicXMLReader(object):
         return composer, lyricist
 
     @classmethod
-    def _get_measures(cls, root):
+    def _get_measures(cls, root, keysig):
         # tempo
         bpm = float(root.find('part/measure/direction/sound').attrib['tempo'])
         divisions = float(root.find('part/measure/attributes/divisions').text)
@@ -180,7 +184,8 @@ class MusicXMLReader(object):
 
                 # numerator
                 numerator, denumerator = cls._get_numerators(normal_dur,
-                                                             tuplet)
+                                                             tuplet, time_sigs,
+                                                             measure_index)
 
                 if not rest:
                     freq = cls._get_frequency(pitch_step, octave, acc)
@@ -191,9 +196,7 @@ class MusicXMLReader(object):
                 temp_note = [pitch_step, octave, acc, dot, tuplet, rest,
                              normal_dur, symbtr_txt_id, lyrics, numerator,
                              denumerator, freq]
-
                 print temp_note
-
                 temp_measure.append(temp_note)
 
             # add temp measure to the measure
@@ -260,11 +263,15 @@ class MusicXMLReader(object):
             return ''
 
     @classmethod
-    def _get_numerators(cls, normal_dur, tuplet):
-        numerator = Fraction(normal_dur).limit_denominator(100).numerator
-        denumerator = Fraction(normal_dur).limit_denominator(100).denominator
-        if tuplet:
-            denumerator /= 3
+    def _get_numerators(cls, normal_dur, tuplet, time_sigs, measure_index):
+        if not tuplet:
+            numerator = Fraction(normal_dur).limit_denominator(100).numerator
+            denumerator = Fraction(normal_dur).limit_denominator(100).denominator
+        else:
+            numerator = 1
+            denumerator = 6
+            #ind = cls.find_nearest_index(time_sigs.keys(), measure_index)
+            #denumerator = int(time_sigs[time_sigs.keys()[ind]]['beat_type'])
         return numerator, denumerator
 
     @staticmethod
@@ -274,6 +281,20 @@ class MusicXMLReader(object):
             freq *= 2 ** (int(acc) / 53.0)
         return freq
 
+    @staticmethod
+    def _get_tonic_sym(measures):
+        for i in range(1, len(measures[-1])):
+            if measures[-1][-i][0] != 'r':
+                return measures[-1][-i][0].upper() + str(measures[-1][-i][1])
+
+    @staticmethod
+    def find_nearest_index(n_array, value):
+        index = (np.abs(np.array(n_array) - value)).argmin()
+        val = n_array[index]
+        if value < val:
+            return index - 1
+        else:
+            return index
 
 class _XMLCommentHandler(eT.XMLTreeBuilder):
     def __init__(self):
