@@ -12,7 +12,7 @@ import struct
 harm_max = 4.
 
 
-def make_wav(score, transpose=0, pause=.05, repeat=0, fn="out.wav",
+def make_wav(score, bpm, transpose=0, pause=.05, repeat=0, fn="out.wav",
              silent=False, verbose=False):
 
     # wave settings
@@ -23,7 +23,7 @@ def make_wav(score, transpose=0, pause=.05, repeat=0, fn="out.wav",
     f.setframerate(44100)
     f.setcomptype('NONE', 'Not Compressed')
 
-    bpm_fac = 120. / score['bpm']
+    bpm_fac = 30. / bpm
 
     def length(l):
         return 88200. / l * bpm_fac
@@ -79,26 +79,22 @@ def make_wav(score, transpose=0, pause=.05, repeat=0, fn="out.wav",
     curpos = 0
     ex_pos = 0.
     for rp in range(repeat + 1):
-        for nn, x in enumerate(score['notes']):
+        for nn, x in enumerate(score):
             if verbose and nn % 10 == 0:
-                print("[{0}/{1}]".format(nn + 1, len(score["notes"])))
-            if x[0] != '__' and int(x[3]) != 0 and int(x[4]) != 0:
+                print("[{0}/{1}]".format(nn + 1, len(score)))
+            if x[0] != u'r' and int(x[9]) != 0 and int(x[10]) != 0:
 
                 vol = 1.  # volume
-                a = int(x[2])  # frequency
+                a = int(x[11])  # frequency
                 a *= 2 ** transpose
 
-                if int(x[4]) != 0 and int(x[3]) != 0:
-                    if x[4] < 0:
-                        b = length(-2. * (int(x[4]) / float(x[3])) / 3.)
-                    else:
-                        b = length(int(x[4]) / float(x[3]))
+                b = length(int(x[10]) / float(x[9]))
 
                 ex_pos += b
                 curpos += render2(a, b, vol)
 
-            if x[0] == '__':
-                b = length(int(x[4]) / float(x[3]))
+            if x[0] == u'r':
+                b = length(int(x[10]) / float(x[9]))
                 ex_pos += b
                 f.writeframesraw(sixteen_bit(0) * int(b))
                 curpos += int(b)
