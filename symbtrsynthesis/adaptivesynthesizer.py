@@ -36,15 +36,15 @@ class AdaptiveSynthesizer:
                 return key
 
     @staticmethod
-    def synthesize(musicxml_path, reference='', synth_type='karplus',
+    def synthesize(musicxml_path, ref_rec='', synth_type='karplus',
                    out='', verbose=False):
         if verbose:
             logging.basicConfig(level=logging.DEBUG)
 
-        if not reference == '':
-            assert os.path.exists(reference), 'reference should either be ' \
-                                              'empty (AEU theory) or a wav ' \
-                                              'file.'
+        if not ref_rec == '':
+            assert os.path.exists(ref_rec), 'reference should either be ' \
+                                            'empty (AEU theory) or a wav ' \
+                                            'file.'
         assert synth_type in ['sine', 'karplus'], 'synth_type! should ' \
                                                   'be either "sine" or ' \
                                                   '"karplus".'
@@ -52,38 +52,41 @@ class AdaptiveSynthesizer:
         logging.info(u"Reading the MusicXML file: {}".format(musicxml_path))
         score = read_music_xml(musicxml_path)
 
-        if reference == '':
+        if ref_rec == '':
             logging.info("Synthesizing the score wrt AEU theory")
             stablenotes = None
-        else:
+        else:  # audio recording as the reference
             logging.info("Synthesizing the score wrt the recording: {}".format(
-                reference))
-
-            # extract predominant melody
-            logging.info("... Extracting the predominant melody")
-            pitch = AdaptiveSynthesizer.melody_extractor.extract(reference)[
-                'pitch']
-            pitch = AdaptiveSynthesizer.pitch_filter.run(pitch)
-
-            # identify tonic
-            logging.info("... Extracting the tonic")
-            tonic = AdaptiveSynthesizer.tonic_identifier.identify(pitch)[0]
-
-            # tuning analysis
-            logging.info("... Extracting the tuning")
-            pitch_distribution = PitchDistribution.from_hz_pitch(
-                pitch[:, 1], ref_freq=tonic['value'])
-            stablenotes = AdaptiveSynthesizer.note_modeler.calculate_notes(
-                pitch_distribution, tonic['value'], score['makam'],
-                min_peak_ratio=0.1)
+                ref_rec))
+            stablenotes = AdaptiveSynthesizer._extract_tuning_from_recording(
+                ref_rec, score)
 
         if not out:
             out = musicxml_path[:-4] + "--adapted_" + synth_type + ".wav"
 
         # synthesize
-        AdaptiveSynthesizer.synth_from_tuning(score, stable_notes=stablenotes,
-                                              synth_type='karplus', out=out,
-                                              verbose=verbose)
+        AdaptiveSynthesizer.synth_from_tuning(
+            score, stable_notes=stablenotes, synth_type='karplus', out=out,
+            verbose=verbose)
+
+    @staticmethod
+    def _extract_tuning_from_recording(reference, score):
+        # extract predominant melody
+        logging.info("... Extracting the predominant melody")
+        pitch = AdaptiveSynthesizer.melody_extractor.extract(reference)[
+            'pitch']
+        pitch = AdaptiveSynthesizer.pitch_filter.run(pitch)
+        # identify tonic
+        logging.info("... Extracting the tonic")
+        tonic = AdaptiveSynthesizer.tonic_identifier.identify(pitch)[0]
+        # tuning analysis
+        logging.info("... Extracting the tuning")
+        pitch_distribution = PitchDistribution.from_hz_pitch(
+            pitch[:, 1], ref_freq=tonic['value'])
+        stablenotes = AdaptiveSynthesizer.note_modeler.calculate_notes(
+            pitch_distribution, tonic['value'], score['makam'],
+            min_peak_ratio=0.1)
+        return stablenotes
 
     @staticmethod
     def synth_from_tuning(score, stable_notes=None,
