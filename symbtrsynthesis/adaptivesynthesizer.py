@@ -1,8 +1,8 @@
 import os
 
 from . synthesizer import synth_karplus, synth_sine
-from . musicxml_reader import read_music_xml
-from . musicxml_reader import interval_dict
+from . musicxmlreader import read_music_xml
+from . musicxmlreader import interval_dict
 
 from morty.converter import Converter
 from predominantmelodymakam.predominantmelodymakam import \
