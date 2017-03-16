@@ -40,9 +40,8 @@ def make_wav(score, transpose=0, pause=0.0, repeat=0, fn="out.wav",
         t = (lf - 3.) / (8.5 - 3.)
         volfac = 1. + .8 * t * cos(pi / 5.3 * (lf - 3.))
         snd_len = int((10. - lf) * q)
-        if lf < 4: snd_len *= 2
-        x = np.arange(snd_len)
-        s = x / float(q)
+        if lf < 4:
+            snd_len *= 2
 
         kp_len = int(l[0])
         kps1 = np.zeros(snd_len)
@@ -79,7 +78,7 @@ def make_wav(score, transpose=0, pause=0.0, repeat=0, fn="out.wav",
 
     for rp in range(repeat + 1):
         for nn, x in enumerate(score['notes']):
-            if verbose and not nn % 10 and silent == False:
+            if verbose and not nn % 10 and not silent:
                 print("[%u/%u]\t" % (nn + 1, len(score['notes'])))
 
             # and int(x[4]) != 0 and int(x[5]) != 0:

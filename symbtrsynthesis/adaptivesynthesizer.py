@@ -1,6 +1,8 @@
 import os
 
-from . synthesizer import synth_karplus, synth_sine
+from . synthesizer.synth_S_microtonal import make_wav as synth_karplus
+from . synthesizer.synth_A_microtonal import make_wav as synth_sine
+
 from . musicxmlreader import read_music_xml
 from . musicxmlreader import interval_dict
 
@@ -59,7 +61,8 @@ class AdaptiveSynthesizer:
 
             # extract predominant melody
             logging.info("... Extracting the predominant melody")
-            pitch = AdaptiveSynthesizer.melody_extractor.extract(reference)['pitch']
+            pitch = AdaptiveSynthesizer.melody_extractor.extract(reference)[
+                'pitch']
             pitch = AdaptiveSynthesizer.pitch_filter.run(pitch)
 
             # identify tonic
@@ -95,7 +98,8 @@ class AdaptiveSynthesizer:
         # audio reference
         if stable_notes is not None:
             logging.info("Replacing the pitches wrt the audio tuning")
-            AdaptiveSynthesizer._replace_tuning(score, stable_notes, tonic_symbol, verbose)
+            AdaptiveSynthesizer._replace_tuning(score, stable_notes,
+                                                tonic_symbol, verbose)
 
         # synthesize
         if synth_type == 'sine':

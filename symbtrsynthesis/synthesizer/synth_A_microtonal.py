@@ -58,9 +58,12 @@ def make_wav(score, transpose=0, pause=.05, repeat=0, fn="out.wav",
 
         for x in range(q):
             fac = 1.
-            if x < 100: fac = x / 80.
-            if 100 <= x < 300: fac = 1.25 - (x - 100) / 800.
-            if x > q - 400: fac = 1. - ((x - q + 400) / 400.)
+            if x < 100:
+                fac = x / 80.
+            if 100 <= x < 300:
+                fac = 1.25 - (x - 100) / 800.
+            if x > q - 400:
+                fac = 1. - ((x - q + 400) / 400.)
             s = float(x) / float(q)
             dfac = 1. - s + s * decay
             ow += sixteen_bit((asin(float(x) / l[0])
