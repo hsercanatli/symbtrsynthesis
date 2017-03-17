@@ -3,9 +3,8 @@ import os
 from .synthesizer.synth_S_microtonal import make_wav as synth_karplus
 from .synthesizer.synth_A_microtonal import make_wav as synth_sine
 
-from .musicxmlreader import read_music_xml
 from .musicxmlreader import interval_dict
-from .reader import MusicXMLReader
+from .musicxmlreader import MusicXMLReader
 
 from morty.converter import Converter
 from predominantmelodymakam.predominantmelodymakam import \
