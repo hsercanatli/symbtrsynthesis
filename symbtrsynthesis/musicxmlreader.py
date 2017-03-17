@@ -10,9 +10,7 @@ import numpy as np
 
 from morty.converter import Converter
 
-
 __author__ = 'hsercanatli', 'burakuyar', 'andresferrero', 'sertansenturk'
-
 
 # load the interval dictionary
 interval_dict = json.load(open(os.path.join(os.path.dirname(
@@ -27,13 +25,13 @@ _freq_dict['__'] = 0  # add rest
 
 class MusicXMLReader(object):
     _makam_accidentals = {'quarter-flat': '-1',
-                         'slash-flat': '-4',
-                         'flat': '-5',
-                         'double-slash-flat': '-8',
-                         'quarter-sharp': '+1',
-                         'sharp': '+4',
-                         'slash-quarter-sharp': '+5',
-                         'slash-sharp': '+8'}
+                          'slash-flat': '-4',
+                          'flat': '-5',
+                          'double-slash-flat': '-8',
+                          'quarter-sharp': '+1',
+                          'sharp': '+4',
+                          'slash-quarter-sharp': '+5',
+                          'slash-sharp': '+8'}
 
     _note_type_dict = {'whole': [2 ** 2, 1], 'half': [2 ** 1, 2],
                        'quarter': [2 ** 0, 4], 'eighth': [2 ** -1, 8],
@@ -136,8 +134,8 @@ class MusicXMLReader(object):
         divisions = float(root.find('part/measure/attributes/divisions').text)
         quarter_note_len = 60000.0 / bpm
 
-        beat_type = root.find('part/measure/attributes/time/beat-type').text
-        beats = root.find('part/measure/attributes/time/beats').text
+        # beat_type = root.find('part/measure/attributes/time/beat-type').text
+        # beats = root.find('part/measure/attributes/time/beats').text
 
         # read measures
         measures = []
@@ -265,12 +263,13 @@ class MusicXMLReader(object):
     def _get_numerators(cls, normal_dur, tuplet, time_sigs, measure_index):
         if not tuplet:
             numerator = Fraction(normal_dur).limit_denominator(100).numerator
-            denumerator = Fraction(normal_dur).limit_denominator(100).denominator
+            denumerator = Fraction(normal_dur).limit_denominator(
+                100).denominator
         else:
             numerator = 1
             denumerator = 6
-            #ind = cls.find_nearest_index(time_sigs.keys(), measure_index)
-            #denumerator = int(time_sigs[time_sigs.keys()[ind]]['beat_type'])
+            # ind = cls.find_nearest_index(time_sigs.keys(), measure_index)
+            # denumerator = int(time_sigs[time_sigs.keys()[ind]]['beat_type'])
         return numerator, denumerator
 
     @staticmethod
@@ -294,6 +293,7 @@ class MusicXMLReader(object):
             return index - 1
         else:
             return index
+
 
 class _XMLCommentHandler(eT.XMLTreeBuilder):
     def __init__(self):
