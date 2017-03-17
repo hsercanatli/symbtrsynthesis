@@ -196,7 +196,6 @@ class MusicXMLReader(object):
                 temp_note = [pitch_step, octave, acc, dot, tuplet, rest,
                              normal_dur, symbtr_txt_id, lyrics, numerator,
                              denumerator, freq]
-                print temp_note
                 temp_measure.append(temp_note)
 
             # add temp measure to the measure
