@@ -10,7 +10,7 @@ import numpy as np
 from math import cos, pi, log, floor, ceil
 
 
-def make_wav(score, transpose=0, pause=0.0, repeat=0, fn="out.wav",
+def make_wav(score, bpm, transpose=0, pause=0.0, repeat=0, fn="out.wav",
              silent=False, verbose=False):
 
     # wave settings
@@ -21,7 +21,7 @@ def make_wav(score, transpose=0, pause=0.0, repeat=0, fn="out.wav",
     f.setframerate(44100)
     f.setcomptype('NONE', 'Not Compressed')
 
-    bpm_fac = 120. / score['bpm']
+    bpm_fac = 30. / bpm
 
     def length(l):
         return 88200. / l * bpm_fac
@@ -66,39 +66,36 @@ def make_wav(score, transpose=0, pause=0.0, repeat=0, fn="out.wav",
 
     ex_pos = 0.
     t_len = 0
-    for x in score['notes']:
-        # ornamentations are ignored
-        if int(x[3]) != 0 and int(x[4]) != 0:
-            if int(x[4]) * int(x[3]) < 0:
-                t_len += length(-2. * (float(x[4]) * float(x[3])) / 3.)
-            else:
-                t_len += length(float(x[4]) / float(x[3]))
 
-    data = np.zeros((repeat + 1) * t_len + 20. * 44100.)
+    for x in score:
+        # ornamentations are ignored
+        if int(x[9]) != 0 and int(x[10]) != 0:
+            if int(x[10]) * int(x[9]) < 0:
+                t_len += length(-2. * (float(x[10]) * float(x[9])) / 3.)
+            else:
+                t_len += length(float(x[10]) / float(x[9]))
+
+    data = np.zeros(int((repeat + 1) * t_len + 20. * 44100.))
 
     for rp in range(repeat + 1):
-        for nn, x in enumerate(score['notes']):
+        for nn, x in enumerate(score):
             if verbose and not nn % 10 and not silent:
-                print("[%u/%u]\t" % (nn + 1, len(score['notes'])))
+                print("[%u/%u]\t" % (nn + 1, len(score)))
 
             # and int(x[4]) != 0 and int(x[5]) != 0:
-            if x[0] != '__' and int(x[3]) != 0 and int(x[4]) != 0:
+            if x[0] != u'r' and int(x[9]) != 0 and int(x[10]) != 0:
 
                 vol = 1.
-                a = float(x[2])  # frequency
+                a = float(x[11])  # frequency
                 a *= 2 ** transpose
 
-                if int(x[4]) != 0 and int(x[3]) != 0:
-                    if x[4] < 0:
-                        b = length(-2. * (float(x[4]) / float(x[3])) / 3.)
-                    else:
-                        b = length(float(x[4]) / float(x[3]))
+                b = length(float(x[10]) / float(x[9]))
 
                 render2(a, b, vol, int(ex_pos))
                 ex_pos += b
 
-            if x[0] == '__':
-                b = length(float(x[4]) / float(x[3]))
+            if x[0] == u'r':
+                b = length(float(x[10]) / float(x[9]))
                 ex_pos += b
 
     if not silent and verbose:
