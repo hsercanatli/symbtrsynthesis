@@ -6,3 +6,4 @@ test.py
 /.ipynb_checkpoints
 *.egg-info
 .DS_Store
+sampledata/*.json
