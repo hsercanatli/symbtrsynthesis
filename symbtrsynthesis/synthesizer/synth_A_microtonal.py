@@ -8,6 +8,7 @@
 import wave
 import math
 import struct
+import json
 
 harm_max = 4.
 
@@ -17,6 +18,8 @@ def make_wav(score, bpm, transpose=0, pause=.05, repeat=0, fn="out.wav",
 
     # wave settings
     f = wave.open(fn, 'w')
+
+    map_file = open(fn[:-4] + '--map.json', 'w')
 
     f.setnchannels(1)
     f.setsampwidth(2)
@@ -78,6 +81,8 @@ def make_wav(score, bpm, transpose=0, pause=.05, repeat=0, fn="out.wav",
             print("Writing to file", fn)
     curpos = 0
     ex_pos = 0.
+    time_stamp = 0.
+    symbtr_map = {}
     for rp in range(repeat + 1):
         for nn, x in enumerate(score):
             if verbose and nn % 10 == 0:
@@ -98,6 +103,11 @@ def make_wav(score, bpm, transpose=0, pause=.05, repeat=0, fn="out.wav",
                 ex_pos += b
                 f.writeframesraw(sixteen_bit(0) * int(b))
                 curpos += int(b)
+
+            symbtr_map[time_stamp] = x[7]
+            time_stamp += b / 44100.
+
+    json.dump(symbtr_map, map_file, indent=4)
 
     f.writeframes('')
     f.close()
