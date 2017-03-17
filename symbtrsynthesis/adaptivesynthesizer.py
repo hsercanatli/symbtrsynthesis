@@ -104,9 +104,9 @@ class AdaptiveSynthesizer:
 
         # synthesize
         if synth_type == 'sine':
-            synth_sine(score, bpm, fn=out, verbose=verbose, )
+            synth_sine(score, bpm, fn=out, verbose=verbose)
         elif synth_type == 'karplus':
-            synth_karplus(score, fn=out, verbose=verbose, )
+            synth_karplus(score, bpm, fn=out, verbose=verbose)
 
     @staticmethod
     def _replace_tuning(score, stable_notes, verbose, tnc_sym):
