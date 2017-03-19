@@ -60,7 +60,7 @@ class AdaptiveSynthesizer:
                 ref_rec, makam)
 
         if not out:
-            out = musicxml_path[:-4] + "--adapted_" + synth_type + ".wav"
+            out = musicxml_path[:-4] + synth_type + ".wav"
 
         # synthesize
         AdaptiveSynthesizer.synth_from_tuning(
