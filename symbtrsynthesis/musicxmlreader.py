@@ -23,6 +23,12 @@ for key, val in interval_dict.items():
 _freq_dict['__'] = 0  # add rest
 
 
+# makam dictionary
+_makam_dict = json.load(open(os.path.join(os.path.dirname(
+    os.path.abspath(__file__)), 'data', 'makam.json')))
+
+
+
 class MusicXMLReader(object):
     _makam_accidentals = {'quarter-flat': '-1',
                           'slash-flat': '-4',
@@ -61,6 +67,8 @@ class MusicXMLReader(object):
 
         # makam, form and usul information
         makam, form, usul = cls._get_makam_form_usul(root)
+
+        makam = cls._get_makam_slug(makam)
 
         # work title
         work_title = cls._get_title(root)
@@ -190,8 +198,10 @@ class MusicXMLReader(object):
                 else:
                     freq = 0
 
+                note_sym = cls._get_symbtr_note_sym(pitch_step, octave, int(acc))
+
                 # appending attributes to the temp note
-                temp_note = [pitch_step, octave, acc, dot, tuplet, rest,
+                temp_note = [note_sym, octave, acc, dot, tuplet, rest,
                              normal_dur, symbtr_txt_id, lyrics, numerator,
                              denumerator, freq]
                 temp_measure.append(temp_note)
@@ -282,8 +292,8 @@ class MusicXMLReader(object):
     @staticmethod
     def _get_tonic_sym(measures):
         for i in range(1, len(measures[-1])):
-            if measures[-1][-i][0] != 'r':
-                return measures[-1][-i][0].upper() + str(measures[-1][-i][1])
+            if measures[-1][-i][0] != u'Rr':
+                return measures[-1][-i][0]
 
     @staticmethod
     def find_nearest_index(n_array, value):
@@ -293,6 +303,24 @@ class MusicXMLReader(object):
             return index - 1
         else:
             return index
+
+    @staticmethod
+    def _get_makam_slug(makam_mu2_name):
+        for makam_slug, makam_val in _makam_dict.items():
+            if makam_val['mu2_name'] == makam_mu2_name:
+                return makam_slug
+
+    @staticmethod
+    def _get_symbtr_note_sym(step, octave, acc):
+        if acc == 0:  # natural
+            acc_str = ''
+        elif acc < 0:  # flat
+            acc_str = 'b' + str(abs(acc))
+        else:  # sharp
+            acc_str = '#' + str(acc)
+        note_sym = step.upper() + octave + acc_str
+
+        return note_sym
 
 
 class _XMLCommentHandler(eT.XMLTreeBuilder):
