@@ -87,7 +87,7 @@ def make_wav(score, bpm, transpose=0, pause=.05, repeat=0, fn="out.wav",
         for nn, x in enumerate(score):
             if verbose and nn % 10 == 0:
                 print("[{0}/{1}]".format(nn + 1, len(score)))
-            if x[0] != u'r' and int(x[9]) != 0 and int(x[10]) != 0:
+            if x[0] != u'Rr' and int(x[9]) != 0 and int(x[10]) != 0:
 
                 vol = 1.  # volume
                 a = int(x[11])  # frequency
@@ -98,7 +98,7 @@ def make_wav(score, bpm, transpose=0, pause=.05, repeat=0, fn="out.wav",
                 ex_pos += b
                 curpos += render2(a, b, vol)
 
-            if x[0] == u'r':
+            if x[0] == u'Rr':
                 b = length(int(x[10]) / float(x[9]))
                 ex_pos += b
                 f.writeframesraw(sixteen_bit(0) * int(b))

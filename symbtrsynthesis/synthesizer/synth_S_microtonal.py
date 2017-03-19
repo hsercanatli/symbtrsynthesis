@@ -7,6 +7,7 @@
 
 import wave
 import numpy as np
+import json
 from math import cos, pi, log, floor, ceil
 
 
@@ -15,6 +16,8 @@ def make_wav(score, bpm, transpose=0, pause=0.0, repeat=0, fn="out.wav",
 
     # wave settings
     f = wave.open(fn, 'w')
+
+    map_file = open(fn[:-4] + '--map.json', 'w')
 
     f.setnchannels(1)
     f.setsampwidth(2)
@@ -67,6 +70,9 @@ def make_wav(score, bpm, transpose=0, pause=0.0, repeat=0, fn="out.wav",
     ex_pos = 0.
     t_len = 0
 
+    time_stamp = 0.
+    symbtr_map = {}
+
     for x in score:
         # ornamentations are ignored
         if int(x[9]) != 0 and int(x[10]) != 0:
@@ -83,7 +89,7 @@ def make_wav(score, bpm, transpose=0, pause=0.0, repeat=0, fn="out.wav",
                 print("[%u/%u]\t" % (nn + 1, len(score)))
 
             # and int(x[4]) != 0 and int(x[5]) != 0:
-            if x[0] != u'r' and int(x[9]) != 0 and int(x[10]) != 0:
+            if x[0] != u'Rr' and int(x[9]) != 0 and int(x[10]) != 0:
 
                 vol = 1.
                 a = float(x[11])  # frequency
@@ -94,16 +100,23 @@ def make_wav(score, bpm, transpose=0, pause=0.0, repeat=0, fn="out.wav",
                 render2(a, b, vol, int(ex_pos))
                 ex_pos += b
 
-            if x[0] == u'r':
+            if x[0] == u'Rr':
                 b = length(float(x[10]) / float(x[9]))
                 ex_pos += b
 
+            symbtr_map[time_stamp] = x[7]
+            time_stamp += b / 44100.
+
     if not silent and verbose:
             print("Writing to file", fn)
-
+    import pdb
+    pdb.set_trace()
     data /= data.max() * 2.
     out_len = int(2. * 44100. + ex_pos + .5)
     data2 = np.zeros(out_len, np.short)
     data2[:] = 32000. * data[:out_len]
     f.writeframes(data2.tostring())
     f.close()
+
+    json.dump(symbtr_map, map_file, indent=4)
+
