@@ -109,8 +109,7 @@ def make_wav(score, bpm, transpose=0, pause=0.0, repeat=0, fn="out.wav",
 
     if not silent and verbose:
             print("Writing to file", fn)
-    import pdb
-    pdb.set_trace()
+
     data /= data.max() * 2.
     out_len = int(2. * 44100. + ex_pos + .5)
     data2 = np.zeros(out_len, np.short)
