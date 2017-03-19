@@ -65,8 +65,7 @@ class AdaptiveSynthesizer:
         # synthesize
         AdaptiveSynthesizer.synth_from_tuning(
             measures, bpm, stable_notes=stablenotes, synth_type=synth_type,
-            out=out,
-            verbose=verbose)
+            out=out, tonic_sym=tnc_sym, verbose=verbose)
 
     @staticmethod
     def _extract_tuning_from_recording(reference, makam):
@@ -88,7 +87,7 @@ class AdaptiveSynthesizer:
         return stablenotes
 
     @staticmethod
-    def synth_from_tuning(measures, bpm, stable_notes=None,
+    def synth_from_tuning(measures, bpm, tonic_sym, stable_notes=None,
                           synth_type='karplus', out='out.wav', verbose=False):
         assert synth_type in ['sine', 'karplus'], 'Unknown synthesis type! ' \
                                                   'Choose "sine" or "karplus"'
@@ -99,7 +98,7 @@ class AdaptiveSynthesizer:
 
         if stable_notes is not None:
             logging.info("Replacing the pitches wrt the audio tuning")
-            AdaptiveSynthesizer._replace_tuning(score, stable_notes, verbose)
+            AdaptiveSynthesizer._replace_tuning(score, stable_notes, verbose, tonic_sym)
 
         # synthesize
         if synth_type == 'sine':
@@ -110,12 +109,12 @@ class AdaptiveSynthesizer:
     @staticmethod
     def _replace_tuning(score, stable_notes, verbose, tnc_sym):
         for note in score:
-            note_sym = note[0].upper() + str(note[1])
+            note_sym = note[0]
 
             try:
                 note[11] = stable_notes[note_sym]['stable_pitch']['value']
             except KeyError:
-                if note_sym == u'r':  # rest
+                if note_sym == u'Rr':  # rest
                     pass
                 else:  # tuning not available for the note symbol
                     if verbose:
