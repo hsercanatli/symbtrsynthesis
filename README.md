@@ -55,7 +55,9 @@ The synthesis files [synth_A_microtonal.py](https://github.com/hsercanatli/adapt
 
 Acknowledgements
 ----------------
-We would like to thank [Harold Hagopian](https://en.wikipedia.org/wiki/Harold_Hagopian), the founder of [Traditional Crossroads](http://traditionalcrossroads.com/About-Us), for allowing us to use Tanburi Cemil Bey's performance of [Uşşak Sazsemaisi](http://musicbrainz.org/recording/f970f1e0-0be9-4914-8302-709a0eac088e) in our demos.
+We would like to thank [Harold Hagopian](https://en.wikipedia
+.org/wiki/Harold_Hagopian), the founder of [Traditional Crossroads]
+(http://traditionalcrossroads.com/About-Us), for allowing us to use Tanburi Cemil Bey's performance in our demo. This work is partially supported by the European Research Council under the European Union's Seventh Framework Program, as part of the CompMusic project (ERC grant agreement 267583).
 
 Authors
 -------
