@@ -1,6 +1,6 @@
 # This algorithm is a modified version of the algorithm originally written
 # by Martin C. Doege
-# The algorihm is hosted at:
+# The algorithm is hosted at:
 # https://github.com/mdoege/PySynth/blob/master/pysynth_s.py
 # We adapted the code from v1.1.2, commit 7a704e6 on Jul 22, 2012.
 # The original code is licenced under the GPL.
