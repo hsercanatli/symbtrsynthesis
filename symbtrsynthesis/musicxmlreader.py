@@ -205,7 +205,8 @@ class MusicXMLReader(object):
                 temp_measure.append(temp_note)
 
             # add temp measure to the measure
-            measures.append(temp_measure)
+            if temp_measure:
+                measures.append(temp_measure)
 
         assert 0 in time_sigs.keys(), \
             'The MusicXML score does not start with a time signature'
