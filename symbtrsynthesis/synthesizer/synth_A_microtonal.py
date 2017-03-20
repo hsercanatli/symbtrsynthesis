@@ -9,17 +9,22 @@ import wave
 import math
 import struct
 import json
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 harm_max = 4.
 
 
-def make_wav(score, bpm, transpose=0, pause=.05, repeat=0, fn="out.wav",
+def make_wav(score, bpm, transpose=0, pause=.05, repeat=0, fn="",
              silent=False, verbose=False):
 
     # wave settings
-    f = wave.open(fn, 'w')
+    if not fn:
+        fn = StringIO()
 
-    map_file = open(fn[:-4] + '--map.json', 'w')
+    f = wave.open(fn, 'w')
 
     f.setnchannels(1)
     f.setsampwidth(2)
@@ -107,7 +112,7 @@ def make_wav(score, bpm, transpose=0, pause=.05, repeat=0, fn="out.wav",
             symbtr_map[time_stamp] = x[7]
             time_stamp += b / 44100.
 
-    json.dump(symbtr_map, map_file, indent=4)
-
     f.writeframes('')
     f.close()
+
+    return fn, symbtr_map

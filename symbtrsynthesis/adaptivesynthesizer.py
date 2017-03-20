@@ -59,13 +59,10 @@ class AdaptiveSynthesizer:
             stablenotes = AdaptiveSynthesizer._extract_tuning_from_recording(
                 ref_rec, makam)
 
-        if not out:
-            out = musicxml_path[:-4] + synth_type + ".wav"
-
         # synthesize
         AdaptiveSynthesizer.synth_from_tuning(
             measures, bpm, stable_notes=stablenotes, synth_type=synth_type,
-            out=out, tonic_sym=tnc_sym, verbose=verbose)
+            out=out, verbose=verbose)
 
     @staticmethod
     def _extract_tuning_from_recording(reference, makam):
@@ -88,7 +85,8 @@ class AdaptiveSynthesizer:
 
     @staticmethod
     def synth_from_tuning(measures, bpm, tonic_sym, stable_notes=None,
-                          synth_type='karplus', out='out.wav', verbose=False):
+                          synth_type='karplus', out='', verbose=False):
+
         assert synth_type in ['sine', 'karplus'], 'Unknown synthesis type! ' \
                                                   'Choose "sine" or "karplus"'
 
@@ -98,13 +96,14 @@ class AdaptiveSynthesizer:
 
         if stable_notes is not None:
             logging.info("Replacing the pitches wrt the audio tuning")
-            AdaptiveSynthesizer._replace_tuning(score, stable_notes, verbose, tonic_sym)
+            AdaptiveSynthesizer._replace_tuning(score, stable_notes, verbose,
+                                                tonic_sym)
 
         # synthesize
         if synth_type == 'sine':
-            synth_sine(score, bpm, fn=out, verbose=verbose)
+            return synth_sine(score, bpm, fn=out, verbose=verbose)
         elif synth_type == 'karplus':
-            synth_karplus(score, bpm, fn=out, verbose=verbose)
+            return synth_karplus(score, bpm, fn=out, verbose=verbose)
 
     @staticmethod
     def _replace_tuning(score, stable_notes, verbose, tnc_sym):

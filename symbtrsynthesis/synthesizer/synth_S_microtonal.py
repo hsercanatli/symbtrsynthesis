@@ -9,15 +9,20 @@ import wave
 import numpy as np
 import json
 from math import cos, pi, log, floor, ceil
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 
-def make_wav(score, bpm, transpose=0, pause=0.0, repeat=0, fn="out.wav",
+def make_wav(score, bpm, transpose=0, pause=0.0, repeat=0, fn="",
              silent=False, verbose=False):
 
     # wave settings
-    f = wave.open(fn, 'w')
+    if not fn:
+        fn = StringIO()
 
-    map_file = open(fn[:-4] + '--map.json', 'w')
+    f = wave.open(fn, 'w')
 
     f.setnchannels(1)
     f.setsampwidth(2)
@@ -108,7 +113,7 @@ def make_wav(score, bpm, transpose=0, pause=0.0, repeat=0, fn="out.wav",
             time_stamp += b / 44100.
 
     if not silent and verbose:
-            print("Writing to file", fn)
+        print("Writing wav to ", fn)
 
     data /= data.max() * 2.
     out_len = int(2. * 44100. + ex_pos + .5)
@@ -117,5 +122,4 @@ def make_wav(score, bpm, transpose=0, pause=0.0, repeat=0, fn="out.wav",
     f.writeframes(data2.tostring())
     f.close()
 
-    json.dump(symbtr_map, map_file, indent=4)
-
+    return fn, symbtr_map
