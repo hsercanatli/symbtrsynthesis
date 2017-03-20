@@ -122,4 +122,4 @@ def make_wav(score, bpm, transpose=0, pause=0.0, repeat=0, fn="",
     f.writeframes(data2.tostring())
     f.close()
 
-    return fn, symbtr_map
+    return fn.getvalue(), symbtr_map
