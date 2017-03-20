@@ -22,11 +22,9 @@ for key, val in interval_dict.items():
     _freq_dict[key] = Converter.cent_to_hz(val - 500.0, 16.35)
 _freq_dict['__'] = 0  # add rest
 
-
 # makam dictionary
 _makam_dict = json.load(open(os.path.join(os.path.dirname(
     os.path.abspath(__file__)), 'data', 'makam.json')))
-
 
 
 class MusicXMLReader(object):
@@ -189,16 +187,16 @@ class MusicXMLReader(object):
                 lyrics = cls._get_lyrics(note)
 
                 # numerator
-                numerator, denumerator = cls._get_numerators(normal_dur,
-                                                             tuplet, time_sigs,
-                                                             measure_index)
+                numerator, denumerator = cls._get_numerators(
+                    normal_dur, tuplet, time_sigs, measure_index)
 
                 if not rest:
                     freq = cls._get_frequency(pitch_step, octave, acc)
                 else:
                     freq = 0
 
-                note_sym = cls._get_symbtr_note_sym(pitch_step, octave, int(acc))
+                note_sym = cls._get_symbtr_note_sym(pitch_step, octave,
+                                                    int(acc))
 
                 # appending attributes to the temp note
                 temp_note = [note_sym, octave, acc, dot, tuplet, rest,
@@ -241,7 +239,7 @@ class MusicXMLReader(object):
     @staticmethod
     def _get_normal_dur(note, divisions, quarter_note_len):
         if note.find('duration') is None:  # grace note
-            return None
+            return 0
         else:
             dur = note.find('duration').text  # get the true duration
             return (int(quarter_note_len * float(dur) / divisions) /
