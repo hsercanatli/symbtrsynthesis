@@ -39,7 +39,7 @@ class AdaptiveSynthesizer:
 
         if not ref_rec == '':
             assert os.path.exists(ref_rec), 'reference should either be ' \
-                                            'empty (AEU theory) or a wav ' \
+                                            'empty (AEU theory) or an audio ' \
                                             'file.'
         assert synth_type in ['sine', 'karplus'], 'synth_type! should ' \
                                                   'be either "sine" or ' \
@@ -60,9 +60,9 @@ class AdaptiveSynthesizer:
                 ref_rec, makam)
 
         # synthesize
-        AdaptiveSynthesizer.synth_from_tuning(
-            measures, bpm, stable_notes=stablenotes, synth_type=synth_type,
-            out=out, verbose=verbose)
+        return AdaptiveSynthesizer.synth_from_tuning(
+            measures, bpm, tonic_sym=tnc_sym, stable_notes=stablenotes,
+            synth_type=synth_type, out=out, verbose=verbose)
 
     @staticmethod
     def _extract_tuning_from_recording(reference, makam):
