@@ -87,7 +87,7 @@ def make_wav(score, bpm, transpose=0, pause=.05, repeat=0, fn="",
     curpos = 0
     ex_pos = 0.
     time_stamp = 0.
-    symbtr_map = {}
+    symbtr_map = []
     for rp in range(repeat + 1):
         for nn, x in enumerate(score):
             if verbose and nn % 10 == 0:
@@ -109,7 +109,7 @@ def make_wav(score, bpm, transpose=0, pause=.05, repeat=0, fn="",
                 f.writeframesraw(sixteen_bit(0) * int(b))
                 curpos += int(b)
 
-            symbtr_map[time_stamp] = x[7]
+            symbtr_map.append((x[0], x[7], time_stamp))
             time_stamp += b / 44100.
 
     f.writeframes('')

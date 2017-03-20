@@ -76,7 +76,7 @@ def make_wav(score, bpm, transpose=0, pause=0.0, repeat=0, fn="",
     t_len = 0
 
     time_stamp = 0.
-    symbtr_map = {}
+    symbtr_map = []
 
     for x in score:
         # ornamentations are ignored
@@ -109,7 +109,7 @@ def make_wav(score, bpm, transpose=0, pause=0.0, repeat=0, fn="",
                 b = length(float(x[10]) / float(x[9]))
                 ex_pos += b
 
-            symbtr_map[time_stamp] = x[7]
+            symbtr_map.append((x[0], x[7], time_stamp))
             time_stamp += b / 44100.
 
     if not silent and verbose:
