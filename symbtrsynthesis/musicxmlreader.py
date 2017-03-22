@@ -21,6 +21,8 @@ _freq_dict = {}
 for key, val in interval_dict.items():
     _freq_dict[key] = Converter.cent_to_hz(val - 500.0, 16.35)
 _freq_dict['__'] = 0  # add rest
+_freq_dict['Rr'] = 0  # add rest
+
 
 # makam dictionary
 _makam_dict = json.load(open(os.path.join(os.path.dirname(
