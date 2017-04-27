@@ -23,7 +23,7 @@ Synthesizing a score according to a performance
 from symbtrsynthesis.adaptivesynthesizer import AdaptiveSynthesizer
 
 AdaptiveSynthesizer.synthesize(
-    score_file, reference=audio_file, synth_type='karplus', verbose=False)                                                   verbose=False)
+    score_file, reference=audio_file, synth_type='karplus', verbose=False)
 ```
 
 Please refer to demo.ipynb for an interactive demo and step-by-step explanations.
