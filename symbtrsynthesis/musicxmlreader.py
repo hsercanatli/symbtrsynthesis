@@ -292,9 +292,9 @@ class MusicXMLReader(object):
 
     @staticmethod
     def _get_tonic_sym(measures):
-        for i in range(1, len(measures[-1])):
-            if measures[-1][-i][0] != u'Rr':
-                return measures[-1][-i][0]
+        for note in reversed(measures[-1]):
+            if note[0] != u'Rr':
+                return note[0]
 
     @staticmethod
     def find_nearest_index(n_array, value):
