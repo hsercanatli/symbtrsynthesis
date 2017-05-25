@@ -105,12 +105,15 @@ def make_wav(score, bpm, transpose=0, pause=0.0, repeat=0, fn="",
                 render2(a, b, vol, int(ex_pos))
                 ex_pos += b
 
+                symbtr_map.append((x[0], x[7], time_stamp))
+                time_stamp += b / 44100.
+
             if x[0] == u'Rr':
                 b = length(float(x[10]) / float(x[9]))
                 ex_pos += b
 
-            symbtr_map.append((x[0], x[7], time_stamp))
-            time_stamp += b / 44100.
+                symbtr_map.append((x[0], x[7], time_stamp))
+                time_stamp += b / 44100.
 
     if not silent and verbose:
         print("Writing wav to ", fn)

@@ -103,14 +103,17 @@ def make_wav(score, bpm, transpose=0, pause=.05, repeat=0, fn="",
                 ex_pos += b
                 curpos += render2(a, b, vol)
 
+                symbtr_map.append((x[0], x[7], time_stamp))
+                time_stamp += b / 44100.
+
             if x[0] == u'Rr':
                 b = length(int(x[10]) / float(x[9]))
                 ex_pos += b
                 f.writeframesraw(sixteen_bit(0) * int(b))
                 curpos += int(b)
 
-            symbtr_map.append((x[0], x[7], time_stamp))
-            time_stamp += b / 44100.
+                symbtr_map.append((x[0], x[7], time_stamp))
+                time_stamp += b / 44100.
 
     f.writeframes('')
     f.close()
