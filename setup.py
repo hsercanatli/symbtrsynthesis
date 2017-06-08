@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(name='symbtrsynthesis',
-      version='1.0.0-dev',
+      version='1.0.1-dev',
       description='An (adaptive) synthesizer for SymbTr-MusicXML scores',
       author='Hasan Sercan Atli',
       url='https://github.com/hsercanatli/symbtrsynthesis',
