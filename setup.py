@@ -8,5 +8,6 @@ setup(name='symbtrsynthesis',
       author='Hasan Sercan Atli',
       url='https://github.com/hsercanatli/symbtrsynthesis',
       packages=find_packages(),
+      package_data={'symbtrsynthesis': ['data/*.json']},
       include_package_data=True, install_requires=['numpy']
       )
